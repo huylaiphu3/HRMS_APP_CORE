@@ -1,0 +1,14 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+    volumes:
+      - ./backend/src:/app/src:ro
+
+  mailhog:
+    profiles: []

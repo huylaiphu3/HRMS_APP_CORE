@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HRMS — Danh sách nhân viên</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1677ff; --primary-soft: rgba(22,119,255,.10);
+      --success: #059669; --success-soft: #ecfdf5;
+      --warning: #d97706; --warning-soft: #fffbeb;
+      --danger: #dc2626; --danger-soft: #fef2f2;
+      --sidebar: #0f172a; --sidebar-muted: #94a3b8;
+      --bg: #f6f8fb; --surface: #fff; --text: #111827;
+      --muted: #667085; --faint: #98a2b3; --line: #eef2f7;
+      --shadow: 0 18px 50px rgba(15,23,42,.06), 0 3px 10px rgba(15,23,42,.04);
+      --shadow-hover: 0 24px 70px rgba(15,23,42,.10), 0 8px 18px rgba(15,23,42,.06);
+      --radius: 20px; --radius-sm: 12px;
+    }
+    body { font-family: Inter, system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar { width:260px; background: radial-gradient(circle at 20% 0%, rgba(22,119,255,.20), transparent 28%), var(--sidebar); color:white; position:fixed; inset:0 auto 0 0; display:flex; flex-direction:column; padding:18px 14px; z-index:10; }
+    .brand { display:flex; align-items:center; gap:12px; padding:4px 8px 24px; }
+    .brand-mark { width:40px; height:40px; border-radius:14px; display:grid; place-items:center; font-weight:800; background:linear-gradient(135deg,#1677ff,#69b1ff); box-shadow:0 14px 30px rgba(22,119,255,.30); }
+    .brand-title { font-size:18px; font-weight:750; letter-spacing:-.03em; }
+    .brand-sub { color:var(--sidebar-muted); font-size:12px; margin-top:1px; }
+    .nav { flex:1; overflow:auto; }
+    .nav-group { margin:18px 8px 8px; color:rgba(148,163,184,.70); font-size:11px; text-transform:uppercase; letter-spacing:.12em; font-weight:700; }
+    .nav-item { height:42px; display:flex; align-items:center; gap:12px; border-radius:13px; color:#cbd5e1; padding:0 12px; margin:3px 0; position:relative; cursor:pointer; transition:.2s ease; font-size:14px; font-weight:500; }
+    .nav-item:hover { background:rgba(255,255,255,.07); color:white; transform:translateX(2px); }
+    .nav-item.active { background:rgba(22,119,255,.16); color:white; }
+    .nav-item.active::before { content:""; position:absolute; left:-14px; top:9px; bottom:9px; width:3px; background:#1677ff; border-radius:999px; }
+    .nav-icon { width:19px; height:19px; stroke:currentColor; opacity:.9; }
+    .nav-badge { margin-left:auto; min-width:22px; height:22px; padding:0 7px; display:grid; place-items:center; border-radius:999px; background:#ef4444; color:white; font-size:12px; font-weight:700; }
+    .profile { margin-top:18px; padding:14px; border-top:1px solid rgba(255,255,255,.08); display:flex; align-items:center; gap:12px; }
+    .avatar-img { width:42px; height:42px; border-radius:999px; flex:none; background:linear-gradient(135deg,#dbeafe,#fce7f3); display:grid; place-items:center; overflow:hidden; }
+    .avatar-img svg { width:42px; height:42px; }
+    .profile-name { font-weight:700; font-size:14px; }
+    .profile-role { color:var(--sidebar-muted); font-size:12px; }
+
+    /* ── Main ── */
+    .main { margin-left:260px; width:calc(100% - 260px); padding:28px 36px 44px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
+    .breadcrumb { font-size:13px; color:var(--faint); font-weight:600; margin-bottom:8px; }
+    .breadcrumb a { color:var(--faint); text-decoration:none; }
+    .breadcrumb a:hover { color:var(--primary); }
+    h1 { font-size:32px; line-height:1.15; letter-spacing:-.04em; font-weight:800; margin-bottom:4px; }
+    .subtitle { color:var(--muted); font-size:15px; }
+    .utilities { display:flex; align-items:center; gap:14px; }
+    .search { width:320px; height:44px; border:1px solid var(--line); background:white; border-radius:999px; display:flex; align-items:center; gap:10px; padding:0 16px; color:var(--faint); box-shadow:0 10px 30px rgba(15,23,42,.04); }
+    .u-icon { width:40px; height:40px; border-radius:999px; display:grid; place-items:center; color:#64748b; cursor:pointer; position:relative; transition:.2s; }
+    .u-icon:hover { background:white; color:var(--primary); box-shadow:0 10px 30px rgba(15,23,42,.06); }
+    .dot { position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%; background:#ef4444; border:2px solid var(--bg); }
+    svg { width:19px; height:19px; }
+
+    /* ── Toolbar ── */
+    .toolbar { display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+    .toolbar-search { width:280px; height:44px; border:1px solid var(--line); background:white; border-radius:var(--radius-sm); display:flex; align-items:center; gap:10px; padding:0 14px; color:var(--faint); font-size:14px; }
+    .toolbar-search input { border:none; outline:none; font-family:inherit; font-size:14px; flex:1; color:var(--text); }
+    .toolbar-search input::placeholder { color:var(--faint); }
+    .filter-btn { height:44px; padding:0 16px; border:1px solid var(--line); background:white; border-radius:var(--radius-sm); display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; transition:.15s; font-family:inherit; }
+    .filter-btn:hover { border-color:var(--primary); color:var(--primary); }
+    .toolbar-right { margin-left:auto; display:flex; gap:10px; }
+    .btn { height:44px; padding:0 20px; border-radius:var(--radius-sm); font-size:14px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; border:1px solid var(--line); background:white; color:var(--text); font-family:inherit; transition:.18s; }
+    .btn:hover { border-color:var(--primary); color:var(--primary); transform:translateY(-1px); box-shadow:0 8px 24px rgba(15,23,42,.06); }
+    .btn-primary { background:var(--primary); color:white; border-color:var(--primary); box-shadow:0 14px 30px rgba(22,119,255,.18); }
+    .btn-primary:hover { background:#4096ff; border-color:#4096ff; color:white; }
+
+    /* ── Table Card ── */
+    .table-card { background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+    .bulk-bar { padding:14px 24px; background:var(--primary-soft); display:flex; align-items:center; gap:16px; font-size:13px; color:var(--primary); font-weight:700; border-bottom:1px solid rgba(22,119,255,.08); }
+    .bulk-bar .btn-sm { height:32px; padding:0 14px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; border:none; font-family:inherit; }
+    .bulk-bar .btn-sm-p { background:var(--primary); color:white; }
+    .bulk-bar .btn-sm-d { background:transparent; border:1px solid var(--danger); color:var(--danger); }
+    .bulk-dismiss { margin-left:auto; cursor:pointer; opacity:.6; }
+    .bulk-dismiss:hover { opacity:1; }
+
+    table { width:100%; border-collapse:collapse; }
+    thead { background:#f8faff; }
+    th { text-align:left; padding:12px 24px; color:#94a3b8; font-size:12px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
+    td { padding:16px 24px; border-top:1px solid var(--line); vertical-align:middle; font-size:14px; }
+    tr { transition:.18s; }
+    tbody tr:hover { background:#fbfdff; }
+    .cb { width:18px; height:18px; accent-color:var(--primary); cursor:pointer; border-radius:4px; }
+
+    .emp { display:flex; align-items:center; gap:12px; }
+    .emp-avatar { width:38px; height:38px; border-radius:999px; flex:none; display:grid; place-items:center; font-weight:800; font-size:14px; color:white; }
+    .emp-name { font-weight:700; color:#1f2937; }
+    .emp-email { font-size:12px; color:var(--faint); margin-top:1px; }
+
+    .badge { display:inline-flex; align-items:center; border-radius:999px; padding:5px 12px; font-size:12px; font-weight:800; white-space:nowrap; }
+    .badge.blue { background:#eff6ff; color:#1d4ed8; }
+    .badge.green { background:#ecfdf5; color:#047857; }
+    .badge.orange { background:#fff7ed; color:#c2410c; }
+    .badge.amber { background:#fffbeb; color:#b45309; }
+    .badge.red { background:#fef2f2; color:#b91c1c; }
+    .badge.gray { background:#f1f5f9; color:#475569; }
+    .badge.purple { background:#f5f3ff; color:#6d28d9; }
+
+    .row-actions { display:flex; gap:6px; opacity:0; transition:.15s; }
+    tbody tr:hover .row-actions { opacity:1; }
+    .row-act { width:32px; height:32px; border-radius:8px; border:none; background:transparent; cursor:pointer; display:grid; place-items:center; color:var(--faint); transition:.15s; }
+    .row-act:hover { background:var(--primary-soft); color:var(--primary); }
+    .row-act.danger:hover { background:var(--danger-soft); color:var(--danger); }
+
+    .pagination { padding:16px 24px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--line); }
+    .page-info { font-size:13px; color:var(--muted); font-weight:600; }
+    .page-nav { display:flex; gap:4px; }
+    .page-btn { width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:white; cursor:pointer; display:grid; place-items:center; font-size:13px; font-weight:700; color:var(--muted); transition:.15s; font-family:inherit; }
+    .page-btn:hover { border-color:var(--primary); color:var(--primary); }
+    .page-btn.active { background:var(--primary); color:white; border-color:var(--primary); }
+    .page-btn.disabled { opacity:.4; pointer-events:none; }
+
+    @media (max-width:1280px) { .toolbar-search { width:220px; } .search { width:240px; } }
+    @media (max-width:900px) { .sidebar { transform:translateX(-100%); } .main { margin-left:0; width:100%; padding:22px; } .topbar { flex-direction:column; align-items:flex-start; gap:18px; } .utilities { width:100%; } .search { flex:1; } }
+    @media (max-width:640px) { .main { padding:16px; } h1 { font-size:26px; } .toolbar { flex-direction:column; align-items:stretch; } .toolbar-search { width:100%; } .toolbar-right { margin-left:0; } .table-card { overflow-x:auto; } table { min-width:800px; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">H</div><div><div class="brand-title">HRMS</div><div class="brand-sub">People Operations</div></div></div>
+      <nav class="nav">
+        <div class="nav-item"><svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-4H4v4Z" stroke="currentColor"/></svg>Dashboard</div>
+        <div class="nav-group">Quản lý</div>
+        <div class="nav-item active"><svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3ZM8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3Zm8 2c-2.2 0-6 1.1-6 3.3V18h12v-1.7c0-2.2-3.8-3.3-6-3.3ZM8 13c-2.2 0-6 1.1-6 3.3V18h6" stroke="currentColor"/></svg>Nhân sự</div>
+        <div class="nav-item"><svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor"/><path d="M14 3v5h5M9 13h6M9 17h6" stroke="currentColor"/></svg>Hợp đồng</div>
+        <div class="nav-item"><svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M7 3v4M17 3v4M4 9h16M5 5h14v16H5V5Z" stroke="currentColor"/></svg>Chấm công</div>
+        <div class="nav-item"><svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M8 7V3m8 4V3M5 11h14M5 5h14v16H5V5Z" stroke="currentColor"/><path d="m8 16 2 2 5-5" stroke="currentColor"/></svg>Nghỉ phép</div>
+        <div class="nav-item"><svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" stroke="currentColor"/></svg>Tiền lương</div>
+        <div class="nav-group">Workflow</div>
+        <div class="nav-item"><svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M9 12l2 2 4-5M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" stroke="currentColor"/></svg>Phê duyệt <span class="nav-badge">5</span></div>
+        <div class="nav-group">Hệ thống</div>
+        <div class="nav-item"><svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M4 19V5m0 14h16M8 16V9m5 7V6m5 10v-4" stroke="currentColor"/></svg>Báo cáo</div>
+        <div class="nav-item"><svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" stroke="currentColor"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9c.3.6.9 1 1.6 1h.1a2 2 0 1 1 0 4H21c-.7 0-1.3.4-1.6 1Z" stroke="currentColor"/></svg>Cấu hình</div>
+      </nav>
+      <div class="profile">
+        <div class="avatar-img"><svg viewBox="0 0 80 80" fill="none"><rect width="80" height="80" fill="#dbeafe"/><circle cx="40" cy="29" r="14" fill="#60a5fa"/><path d="M17 75c4-17 14-26 23-26s19 9 23 26" fill="#2563eb"/></svg></div>
+        <div><div class="profile-name">Nguyễn Thị Lan</div><div class="profile-role">HR Admin</div></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="topbar">
+        <div>
+          <div class="breadcrumb"><a href="#">Dashboard</a> / Nhân sự</div>
+          <h1>Danh sách nhân viên</h1>
+          <p class="subtitle">Quản lý toàn bộ nhân viên trong công ty</p>
+        </div>
+        <div class="utilities">
+          <div class="search"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="m21 21-4.3-4.3M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/></svg><span>Tìm nhân viên, hợp đồng...</span></div>
+          <div class="u-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 0 1-6 0"/></svg><span class="dot"></span></div>
+          <div class="u-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/></svg></div>
+          <div class="avatar-img"><svg viewBox="0 0 80 80" fill="none"><rect width="80" height="80" fill="#fce7f3"/><circle cx="40" cy="29" r="14" fill="#f472b6"/><path d="M17 75c4-17 14-26 23-26s19 9 23 26" fill="#db2777"/></svg></div>
+        </div>
+      </section>
+
+      <section class="toolbar">
+        <div class="toolbar-search">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#98a2b3"><path stroke-width="2" d="m21 21-4.3-4.3M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/></svg>
+          <input type="text" placeholder="Tìm theo tên, email, mã NV...">
+        </div>
+        <button class="filter-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-width="2" d="M3 4h18l-7 8.2V17l-4 2V12.2L3 4Z"/></svg>
+          Phòng ban
+        </button>
+        <button class="filter-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-width="2" d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/><path stroke-width="2" d="m9 12 2 2 4-5"/></svg>
+          Trạng thái
+        </button>
+        <div class="toolbar-right">
+          <button class="btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-width="2" d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+            Import
+          </button>
+          <button class="btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-width="2" d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M16 6l-4-4-4 4M12 3v12"/></svg>
+            Xuất Excel
+          </button>
+          <button class="btn btn-primary">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-width="2" d="M12 5v14M5 12h14"/></svg>
+            Thêm nhân viên
+          </button>
+        </div>
+      </section>
+
+      <div class="table-card">
+        <div class="bulk-bar" style="display:none">
+          Đã chọn 2 nhân viên
+          <button class="btn-sm btn-sm-p">Xuất Excel</button>
+          <button class="btn-sm btn-sm-d">Xoá</button>
+          <span class="bulk-dismiss">Bỏ chọn</span>
+        </div>
+
+        <table>
+          <thead><tr>
+            <th style="width:44px"><input type="checkbox" class="cb"></th>
+            <th>Nhân viên</th>
+            <th>Phòng ban</th>
+            <th>Chức vụ</th>
+            <th>Trạng thái</th>
+            <th>Ngày vào</th>
+            <th style="width:100px"></th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)">TB</div><div><div class="emp-name">Trần Văn Bình</div><div class="emp-email">binh.tran@company.vn</div></div></div></td>
+              <td><span class="badge blue">Kỹ thuật</span></td>
+              <td>Frontend Developer</td>
+              <td><span class="badge orange">Thử việc</span></td>
+              <td style="color:var(--muted)">01/05/2026</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">PH</div><div><div class="emp-name">Phạm Thị Hoa</div><div class="emp-email">hoa.pham@company.vn</div></div></div></td>
+              <td><span class="badge purple">Marketing</span></td>
+              <td>Content Specialist</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">15/03/2024</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">VT</div><div><div class="emp-name">Võ Minh Tuấn</div><div class="emp-email">tuan.vo@company.vn</div></div></div></td>
+              <td><span class="badge purple">Marketing</span></td>
+              <td>Graphic Designer</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">08/01/2025</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#10b981,#34d399)">NM</div><div><div class="emp-name">Nguyễn Thị Mai</div><div class="emp-email">mai.nguyen@company.vn</div></div></div></td>
+              <td><span class="badge blue">Kỹ thuật</span></td>
+              <td>QA Engineer</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">20/07/2023</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#ec4899,#f472b6)">LN</div><div><div class="emp-name">Lê Hoàng Nam</div><div class="emp-email">nam.le@company.vn</div></div></div></td>
+              <td><span class="badge gray">Kế toán</span></td>
+              <td>Kế toán viên</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">12/11/2022</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#6366f1,#818cf8)">ĐP</div><div><div class="emp-name">Đặng Hữu Phúc</div><div class="emp-email">phuc.dang@company.vn</div></div></div></td>
+              <td><span class="badge gray">Kế toán</span></td>
+              <td>Kế toán trưởng</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">03/06/2021</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#14b8a6,#5eead4)">LH</div><div><div class="emp-name">Lý Thanh Hằng</div><div class="emp-email">hang.ly@company.vn</div></div></div></td>
+              <td><span class="badge purple">Marketing</span></td>
+              <td>Marketing Executive</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">22/09/2023</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">BH</div><div><div class="emp-name">Bùi Quang Huy</div><div class="emp-email">huy.bui@company.vn</div></div></div></td>
+              <td><span class="badge blue">Kỹ thuật</span></td>
+              <td>Backend Developer</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">10/02/2024</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8)">NH</div><div><div class="emp-name">Ngô Văn Hiếu</div><div class="emp-email">hieu.ngo@company.vn</div></div></div></td>
+              <td><span class="badge blue">Kỹ thuật</span></td>
+              <td>DevOps Engineer</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">05/08/2022</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#a855f7,#c084fc)">TT</div><div><div class="emp-name">Trương Thị Thuỷ</div><div class="emp-email">thuy.truong@company.vn</div></div></div></td>
+              <td><span class="badge gray">Hành chính</span></td>
+              <td>Nhân viên hành chính</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">14/04/2023</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#f97316,#fb923c)">HT</div><div><div class="emp-name">Hoàng Minh Trí</div><div class="emp-email">tri.hoang@company.vn</div></div></div></td>
+              <td><span class="badge blue">Kỹ thuật</span></td>
+              <td>Mobile Developer</td>
+              <td><span class="badge orange">Thử việc</span></td>
+              <td style="color:var(--muted)">20/05/2026</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#84cc16,#a3e635)">DL</div><div><div class="emp-name">Dương Thuỳ Linh</div><div class="emp-email">linh.duong@company.vn</div></div></div></td>
+              <td><span class="badge gray">Hành chính</span></td>
+              <td>Lễ tân</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">01/03/2025</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#e11d48,#fb7185)">PA</div><div><div class="emp-name">Phan Văn An</div><div class="emp-email">an.phan@company.vn</div></div></div></td>
+              <td><span class="badge blue">Kỹ thuật</span></td>
+              <td>Team Lead</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">18/06/2020</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="cb"></td>
+              <td><div class="emp"><div class="emp-avatar" style="background:linear-gradient(135deg,#2563eb,#60a5fa)">TK</div><div><div class="emp-name">Trịnh Ngọc Khánh</div><div class="emp-email">khanh.trinh@company.vn</div></div></div></td>
+              <td><span class="badge purple">Marketing</span></td>
+              <td>SEO Specialist</td>
+              <td><span class="badge green">Chính thức</span></td>
+              <td style="color:var(--muted)">07/10/2024</td>
+              <td><div class="row-actions">
+                <button class="row-act"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M15.2 3.8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L8 21H3v-5L15.2 3.8Z"/></svg></button>
+                <button class="row-act danger"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/></svg></button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <div class="page-info">Hiển thị <b>1-15</b> / <b>118</b> nhân viên</div>
+          <div class="page-nav">
+            <button class="page-btn disabled">&lt;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">4</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">8</button>
+            <button class="page-btn">&gt;</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

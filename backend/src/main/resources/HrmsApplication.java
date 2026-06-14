@@ -1,11 +1,13 @@
 package com.hrms;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+@Slf4j
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableAsync
@@ -14,23 +16,49 @@ public class HrmsApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(HrmsApplication.class, args);
+        /*
+        có 3 cách tạo bean :
+        1.@component
+        2.@configuration + @bean
+        3.xml -> legacy
 
-        /* DI Và IOC
-        DI : dependency injection : là một kỹ thuật trong đó một đối tượng nhận các phụ thuộc của nó từ bên ngoài thay vì tự tạo ra chúng
-        . Điều này giúp giảm sự phụ thuộc giữa các lớp và làm cho mã dễ bảo trì hơn.
-        IOC : inversion of control
-        : là một nguyên tắc thiết kế trong đó quyền kiểm soát của việc tạo và quản lý các đối tượng được chuyển từ mã của bạn sang một framework hoặc container.
-        Điều này giúp giảm sự phụ thuộc giữa các lớp và làm cho mã dễ bảo trì hơn
+        nói về 2 cái đầu tiên :
+        @Còonfiguration : là cái class mà do em tự tạo
+        @Bean : là thư viện của bên t3
 
-        container : giống như khi em tạo 1 string -> pool . thì spring boot nó tạo đối tượng -> dđâẩy vào container -> khi nào cần thì nó sẽ lấy ra ->
-        nó quản lý vòng đời của đối tượng đó luôn
+         */
 
-        1 cái kiến thức khác : xóa cứng và xóa mềm( soft delete ) : xóa cứng là xóa hẳn khỏi db
-        xóa mềm : ví dụ có 1 cái cờ (flag ) coó thẻ là trường deletedBy nếu trường này có giá trị thì nó sẽ coi như là bị xóa
-        việc xóa mềm như này -> dễ lưu lại lịch sử , tracking , nhưng cũng có thể gây phình to dữ liệu mà ko cần phải xóa
-        có 2 trường hợp :
-        xóa user : xóa mềm -> viì còn nhiều dữ liệu nhảy cảm khác
-        xóa tin nhắn : xóa cứng -> vì hậu quả để lại ko nhiều , có thể cân nhắc
+        /*
+        có bao nhiêu cách để ghi log :
+        đầu tiên : sysout -> dùng trong trương hợp em muốn hiển thị value của biến
+        t2 : logger slf4j -> sử dụng khác vs sout vì nó có thời gian , logging level , tên class -> vậy khi sử dụng logging
+        sẽ sưr dụng cho mục đích giaám sát hệ thống , còn sout chỉ để test local
+         */
+
+        /*
+        global exception : thay vì mỗi chỗ phải throws , viết 1 nơi sử dụng cho tất cả
+         */
+
+        /*
+        stateless vs statefull :
+        ví dụ em đi ăn 1 quán phở quen : chủ quán quen em là khách víp ko cần thẻ nhưng khi mở thêm chi nhánh mới -> nó ko bt em là th nào -> stateful
+        nhưng khi em có thẻ vip thay vì chiỉ nhìn mặt -> em có thê ể đi bất kiì chi nhánh nào -> stateless
+
+        stateless -> ko lưu traạng thái của những gì ở trước đó
+        statefull -> lưu trạng thaái của nhữung gì ở trước đó
+         */
+
+        /*
+        jwt : json web token
+        nó có 3 phần
+        header.payload.signature
+
+        HMACSHA256(
+  base64UrlEncode(header) + "." +
+  base64UrlEncode(payload),
+  secret)
+
+  secret : 1 mật khẩu ngẫu nhiên nên có độ dài tốt thiểu 32 kí tự
          */
     }
 }

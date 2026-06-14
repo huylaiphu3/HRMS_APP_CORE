@@ -2,6 +2,7 @@ package com.hrms.employee.service.serviceImpl;
 
 import com.hrms.employee.dto.EmployeeDTO;
 import com.hrms.employee.dto.EmployeeMapper;
+import com.hrms.employee.entity.Employee;
 import com.hrms.employee.repository.EmployeeRepository;
 import com.hrms.employee.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
-@Primary// primary annotation is used to mark the bean as primary bean ( bean ưu tiên ) = qualifier annotation = @Qualifier("employeeServiceImplV2") = @Order
+//@Primary// primary annotation is used to mark the bean as primary bean ( bean ưu tiên ) = qualifier annotation = @Qualifier("employeeServiceImplV2") = @Order
 public class EmployeeServiceImplV2 implements EmployeeService {
     private static final Logger log = LoggerFactory.getLogger(EmployeeServiceImplV2.class);
     @Autowired
@@ -42,7 +43,8 @@ public class EmployeeServiceImplV2 implements EmployeeService {
 
     @Override
     public EmployeeDTO findById(int id) {
-        return null;
+        Employee employee = employeeRepository.findById(id).orElse(null);
+        return employeeMapper.convertToDTO(employee);
     }
 
     @Override

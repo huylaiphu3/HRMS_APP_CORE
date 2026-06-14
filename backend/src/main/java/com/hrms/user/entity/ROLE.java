@@ -1,4 +1,4 @@
-package com.hrms.user;
+package com.hrms.user.entity;
 
 public enum ROLE {
     USER,ADMIN
