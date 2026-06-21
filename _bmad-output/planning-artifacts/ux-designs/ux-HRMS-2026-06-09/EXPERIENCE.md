@@ -4,16 +4,16 @@ status: final
 sources:
   - {planning_artifacts}/prds/prd-HRMS-2026-06-09/prd.md
   - {planning_artifacts}/architecture.md
-updated: 2026-06-09
+updated: 2026-06-20
 ---
 
 # HRMS — Experience Spine
 
 ## Foundation
 
-Desktop-first responsive web. NG-ZORRO (Ant Design for Angular) trên Angular 17.x + TypeScript. UI library: `ng-zorro-antd` — kế thừa 100% component defaults. `DESIGN.md` là visual identity reference — chỉ định nghĩa brand-layer delta (dark sidebar, semantic color mapping, composite components). Experience spine này owns *cách hệ thống hoạt động*.
+Desktop-first responsive web. NG-ZORRO (Ant Design for Angular) trên Angular 17.x + TypeScript. UI library: `ng-zorro-antd` — kế thừa 100% component defaults. `DESIGN.md` là visual identity reference — định nghĩa brand-layer delta (dark sidebar, semantic color mapping, composite components) theo hướng **Modern Minimalist** (cảm hứng Linear, Notion, Vercel, Stripe). Experience spine này owns *cách hệ thống hoạt động*.
 
-Multi-tenant SaaS: mỗi tenant là một công ty, data hoàn toàn cách ly. User thuộc đúng một tenant, đúng một role. Bốn vai trò với scope khác nhau: System Admin (cross-tenant), HR Admin (toàn tenant), Manager (phòng ban), Employee (cá nhân).
+Hệ thống nội bộ cho một công ty duy nhất — không phải SaaS, không multi-tenant. User có đúng một role. Ba vai trò: Admin/HR Admin (toàn hệ thống), Manager (phòng ban), Employee (cá nhân).
 
 Ngôn ngữ giao diện: **Tiếng Việt** duy nhất trong V1.
 
@@ -34,10 +34,9 @@ Ngôn ngữ giao diện: **Tiếng Việt** duy nhất trong V1.
 | Phê duyệt | — | Admin, Manager | `approval-inbox` |
 | Báo cáo | — | Admin | `report` |
 | Cấu hình | Thông số lương, Phụ cấp, IP Whitelist, Quy trình duyệt | Admin | `config-*` |
-| Hệ thống | Quản lý Tenant | System Admin | `system-tenant` |
 
 **Role-based sidebar visibility:**
-- **System Admin:** Hệ thống only (admin panel riêng).- **HR Admin:** Tất cả trừ Hệ thống.
+- **Admin (HR Admin):** Tất cả menu items.
 - **Manager:** Dashboard, Nhân sự (phòng ban mình, read-only), Chấm công (phòng ban), Nghỉ phép (phòng ban), Phê duyệt.
 - **Employee:** Dashboard, Chấm công (cá nhân), Nghỉ phép (cá nhân), Phiếu lương (cá nhân).
 
@@ -46,12 +45,13 @@ Employee không thấy sidebar item nào ngoài scope — không hiện rồi di
 ### Topbar
 
 ```
-[Logo/Tên công ty] [Breadcrumb]                    [🔍 Search] [🔔 Badge] [Avatar ▾]
+[Brand mark] [Breadcrumb]                    [🔍 Search] [🔔 Badge] [Avatar ▾]
 ```
 
-- **Logo/Tên công ty:** Hiển thị tên tenant hiện tại. Click → Dashboard.
+- **Brand mark:** Logo công ty. Click → Dashboard.
 - **Breadcrumb:** NZ Breadcrumb — `Dashboard / Nhân sự / Nhân viên / Nguyễn Văn A`. Luôn hiển thị path từ root.
-- **Search:** Global search — NZ `nz-input` with search. Tìm nhân viên theo tên/mã. Kết quả dropdown.- **Notification Bell:** NZ `nz-badge` + `Bell` icon. Badge count = số thông báo chưa đọc. Click → Dropdown panel danh sách thông báo, phân trang, polling 30s (FR-25).
+- **Search:** Global search — NZ `nz-input` with search. Tìm nhân viên theo tên/mã. Kết quả dropdown.
+- **Notification Bell:** NZ `nz-badge` + `Bell` icon. Badge count = số thông báo chưa đọc. Click → Dropdown panel danh sách thông báo, phân trang, polling 30s (FR-25).
 - **Avatar:** Click → Dropdown menu: Hồ sơ cá nhân, Đổi mật khẩu, Đăng xuất.
 
 ### Full Surface Map
@@ -77,7 +77,6 @@ Employee không thấy sidebar item nào ngoài scope — không hiện rồi di
 | Config - Allowance | `/config/allowance` | CRUD loại phụ cấp | Admin |
 | Config - IP Whitelist | `/config/ip-whitelist` | CRUD IP cho phép chấm công | Admin |
 | Config - Workflow | `/config/workflow` | Step Builder: cấu hình chuỗi duyệt per-module | Admin |
-| System - Tenants | `/system/tenants` | CRUD tenant (System Admin only) | System Admin |
 | Profile | `/profile` | Thông tin cá nhân, đổi mật khẩu | All |
 | 403 | — | Không có quyền truy cập | All |
 | 404 | — | Trang không tồn tại | All |
@@ -139,13 +138,17 @@ Trọng tâm UX — 90% thời gian HR dùng hệ thống là nhìn bảng.
 - Validation: inline, real-time (Angular Reactive Forms + NZ Form rules). Hiện error message dưới field khi blur hoặc submit.
 - Required fields: label có dấu `*` đỏ (NG-ZORRO default).
 - Submit: Button primary ở footer. Loading state khi đang gửi — disable button, show spinner.
-- Success: NzMessageService.success(("Lưu thành công")` — toast 3 giây, auto dismiss.
-- Error: NzMessageService.error(("Lỗi: {message}")`. Server validation errors → hiện inline tại field tương ứng.
+- Success: NzMessageService.success("Lưu thành công") — toast 3 giây, auto dismiss.
+- Error: NzMessageService.error("Lỗi: {message}"). Server validation errors → hiện inline tại field tương ứng.
 - Cancel: Close modal/drawer. Nếu có thay đổi → Popconfirm "Huỷ thay đổi?".
+
 ### Stat Card (Dashboard)
 
-- Click → navigate đến module tương ứng (e.g., click "Hợp đồng sắp hết hạn" → Contract list filtered by expiring).- Số liệu lớn (H4 20px 600 weight), label nhỏ (caption 12px), icon bên trái (48px, background tròn dùng semantic color nhạt).
+- Click → navigate đến module tương ứng (e.g., click "Hợp đồng sắp hết hạn" → Contract list filtered by expiring).
+- Số liệu lớn (H4 20px 600 weight), label nhỏ (caption 12px), icon bên trái (48px, background tròn dùng semantic color nhạt).
 - Trend indicator: mũi tên lên/xuống + % thay đổi so với tháng trước, success/danger color. Chỉ áp dụng cho payroll stats.
+- Cards dùng subtle elevation (xem `DESIGN.md.Components.card` cho shadow values).
+
 ### Step Builder (Workflow Config)
 
 Full page layout, chia 3 section card tách biệt:
@@ -168,16 +171,19 @@ Full page layout, chia 3 section card tách biệt:
 - Panel: NZ Dropdown (width 360px) `[ASSUMPTION]` — danh sách thông báo, mới nhất trên cùng.
 - Mỗi item: Icon (loại thông báo) + Nội dung (1-2 dòng) + Thời gian ("5 phút trước", "Hôm qua 14:30").
 - Unread: background nhạt `{colors.primary-bg}`. Click → mark as read + navigate đến resource.
-- Footer: "Xem tất cả thông báo" → full notification page.- Polling 30s — badge count cập nhật tự động. Không real-time push V1.
+- Footer: "Xem tất cả thông báo" → full notification page.
+- Polling 30s — badge count cập nhật tự động. Không real-time push V1.
 
 ### Approval Inbox
 
-- Default view: Table layout (không phải card layout) — phù hợp bulk review.- Columns: Người gửi (Avatar + tên), Loại đơn (Tag), Nội dung tóm tắt, Ngày gửi, Bước hiện tại, Trạng thái, Actions.
+- Default view: Table layout (không phải card layout) — phù hợp bulk review.
+- Columns: Người gửi (Avatar + tên), Loại đơn (Tag), Nội dung tóm tắt, Ngày gửi, Bước hiện tại, Trạng thái, Actions.
 - Tab filter: "Chờ duyệt" (default) | "Đã duyệt" | "Đã từ chối" | "Tất cả".
 - Quick actions trong row: Button "Duyệt" (primary, small) + "Từ chối" (danger, small).
 - Duyệt: Popconfirm "Xác nhận duyệt?".
 - Từ chối: Modal nhập lý do (textarea, required) → confirm.
 - Bulk approve: chọn nhiều row → "Duyệt tất cả" (chỉ cho Approve, không bulk reject).
+
 ## State Patterns
 
 | State | Surface | Treatment |
@@ -185,12 +191,12 @@ Full page layout, chia 3 section card tách biệt:
 | Initial load | Mọi page | NZ `nz-skeleton` khớp layout expected. Table: 5 skeleton rows. Dashboard: skeleton cards. Resolves khi data load xong |
 | Empty — chưa có data | List pages | NZ `nz-empty` image + text ngắn + button action chính. "Chưa có nhân viên. [Thêm nhân viên]" |
 | Empty — filter no results | List pages | NZ `nz-empty` (no image) + "Không tìm thấy kết quả. [Xoá bộ lọc]" |
-| Error — API fail | Mọi page | NzMessageService.error(` toast. Nếu full page fail → NZ `nz-result` status="error" + "Thử lại" button |
+| Error — API fail | Mọi page | NzMessageService.error() toast. Nếu full page fail → NZ `nz-result` status="error" + "Thử lại" button |
 | Error — form validation | Form | Inline error dưới field (Angular Reactive Forms + NZ Form default). Scroll to first error field on submit |
 | 403 — không có quyền | Protected pages | NZ `nz-result` status="403": "Bạn không có quyền truy cập trang này." + "Về Dashboard" button |
 | 404 — không tồn tại | Any URL | NZ `nz-result` status="404": "Trang không tồn tại." + "Về Dashboard" button |
 | Offline | Global | Không xử lý đặc biệt V1 — API fail → error toast. `[ASSUMPTION]` |
-| Session expired | Global | JWT hết hạn, refresh fail → redirect `/login` + NzMessageService.warning(("Phiên đăng nhập hết hạn")` |
+| Session expired | Global | JWT hết hạn, refresh fail → redirect `/login` + NzMessageService.warning("Phiên đăng nhập hết hạn") |
 | Account locked | Login | Sau 5 lần sai → "Tài khoản đã bị khoá. Thử lại sau 15 phút." (FR-1) |
 | Unsaved changes | Form (Modal/Drawer) | Close khi dirty → NzModalService.confirm: "Huỷ thay đổi? Dữ liệu chưa lưu sẽ bị mất." `[ASSUMPTION]` |
 | Payroll — Draft vs Confirmed | Payroll detail | Draft: editable table, button "Xác nhận". Confirmed: read-only, button "Xuất Excel" chỉ. Tag status trên header |
@@ -202,10 +208,13 @@ HRMS là công cụ nghiệp vụ cho HR — **mouse-first**, không keyboard-fi
 
 - **Click row** → navigate đến detail (Employee, Contract). Cursor pointer trên row hover.
 - **Double-click** → không dùng. Single click cho mọi action.
-- **Hover** → row highlight (NZ Table default). Hiện action icons inline (Edit, Delete) bên phải row.- **Drag & drop** → không có V1. Step Builder dùng form, không drag.
+- **Hover** → row highlight (NZ Table default). Hiện action icons inline (Edit, Delete) bên phải row. Transition 150-200ms cho mọi hover state (background, opacity, transform).
+- **Drag & drop** → không có V1. Step Builder dùng form, không drag.
 - **Search** → Topbar global search (nhân viên) + inline search per table.
-- **Keyboard** → `Enter` submit form, `Esc` close modal/drawer, `Tab` navigate fields. Không custom shortcuts V1.- **Breadcrumb** → click để navigate lên cấp trên.
+- **Keyboard** → `Enter` submit form, `Esc` close modal/drawer, `Tab` navigate fields. Không custom shortcuts V1.
+- **Breadcrumb** → click để navigate lên cấp trên.
 - **Sidebar collapse** → toggle button trên topbar hoặc sidebar bottom. State lưu localStorage.
+- **Transitions** → tất cả hover/focus state dùng `transition: 150ms ease` hoặc `200ms ease`. Không animation phức tạp — tốc độ thao tác quan trọng hơn visual flair.
 
 **Navigation patterns:**
 - List → Detail: click row (hoặc tên nhân viên link).
@@ -217,13 +226,15 @@ HRMS là công cụ nghiệp vụ cho HR — **mouse-first**, không keyboard-fi
 
 Behavioral. Visual contrast kế thừa NG-ZORRO (WCAG AA compliant by default).
 
-- WCAG 2.1 AA cho web surface. NG-ZORRO components đáp ứng sẵn.- `Tab` order theo reading order trên mọi surface. `Esc` close modal/drawer/popover.
+- WCAG 2.1 AA cho web surface. NG-ZORRO components đáp ứng sẵn.
+- `Tab` order theo reading order trên mọi surface. `Esc` close modal/drawer/popover.
 - Angular Reactive Forms + NZ Form: `aria-required`, `aria-invalid`, error text liên kết qua `aria-describedby` (NG-ZORRO default).
 - NZ Table: `role="table"`, header cells dùng `scope="col"` (NG-ZORRO default).
 - Status Tag: không chỉ dùng màu — kèm text label ("Đã duyệt", "Từ chối"). Color không phải kênh thông tin duy nhất.
 - Focus ring: NG-ZORRO default outline. Không customize.
 - Ảnh/icon decorative: `aria-hidden="true"`. Avatar có `alt` = tên nhân viên.
 - Notification dropdown: `aria-live="polite"` cho badge count update.
+
 ## Responsive & Platform
 
 | Breakpoint | Hành vi |
@@ -236,23 +247,27 @@ Behavioral. Visual contrast kế thừa NG-ZORRO (WCAG AA compliant by default).
 **Desktop-first:** Mọi feature thiết kế và test trên desktop trước. Tablet và mobile là "functional" — sử dụng được nhưng không tối ưu.
 
 **Không làm V1:**
-- Responsive table card layout trên mobile — dùng scroll ngang.- Mobile-specific navigation (bottom tab bar).
+- Responsive table card layout trên mobile — dùng scroll ngang.
+- Mobile-specific navigation (bottom tab bar).
 - Touch-optimized input (larger hit targets).
 - PWA / offline support.
 
 ## Inspiration & Anti-patterns
 
-**Lấy từ NG-ZORRO Pro:**
+**Lấy từ Linear / Vercel:**
 - Layout Sidebar + Topbar + Content. Dark sidebar. Breadcrumb.
+- Tối giản, spacing rộng rãi, typography hierarchy rõ ràng.
+- Subtle elevation thay vì dramatic shadow.
+
+**Lấy từ Notion / Stripe:**
 - ProTable pattern: toolbar trên, table dưới, pagination dưới cùng.
 - Dashboard stat cards row + alerts below.
+- Calm UI, data-focused, không visual noise.
 
-**Lấy từ Base.vn:**
+**Patterns giữ lại:**
 - Quy trình duyệt dạng pipeline steps (visual).
 - Employee detail page dùng tabs.
 - Data-heavy list pages, filter bar nổi bật.
-
-**Lấy từ Jira:**
 - Approval inbox dạng queue — danh sách đơn chờ, quick actions inline.
 - Status tag rõ ràng trên mỗi item.
 
@@ -261,7 +276,8 @@ Behavioral. Visual contrast kế thừa NG-ZORRO (WCAG AA compliant by default).
 - **Complex charts/graphs trên Dashboard** — HR SME cần số liệu nhanh, không cần analytics sâu. Stat cards + simple table đủ.
 - **Kanban board cho approvals** — không phù hợp workflow tuần tự. Table/list với tab filter hiệu quả hơn.
 - **Infinite scroll** — pagination only. HR cần biết "đang ở trang nào" và "tổng bao nhiêu".
-- **Dark mode là default** — light mode default, dark mode opt-in via settings.- **Animation/transition phức tạp** — tốc độ thao tác quan trọng hơn visual flair. Chỉ dùng NG-ZORRO default transition (collapse, fade).
+- **Dark mode là default** — light mode default, dark mode opt-in via settings.
+- **Animation/transition phức tạp** — tốc độ thao tác quan trọng hơn visual flair. Chỉ dùng subtle transitions (150-200ms ease).
 - **Emoji trong app** — không. Professional tone.
 
 ## Key Flows
@@ -303,7 +319,8 @@ Failure: Tuấn từ chối → Modal lý do → Hoa nhận notification kèm l�
 ### Flow 4 — Lan chạy bảng lương tháng (HR Admin, cuối tháng)
 
 1. Lan vào Tiền lương → "Tạo bảng lương" (button primary). Select: Tháng 6/2026.
-2. Hệ thống tính toán (loading bar: "Đang tính lương cho 118 nhân viên..."). Mất ~15 giây.3. Full page Payroll Detail hiện: bảng lương draft. Table: Nhân viên | Ngày công | Lương cơ bản | Phụ cấp | OT | BHXH | BHYT | BHTN | Thuế TNCN | Lương Net. Header hiện Tag "Nháp" (text tertiary).
+2. Hệ thống tính toán (loading bar: "Đang tính lương cho 118 nhân viên..."). Mất ~15 giây.
+3. Full page Payroll Detail hiện: bảng lương draft. Table: Nhân viên | Ngày công | Lương cơ bản | Phụ cấp | OT | BHXH | BHYT | BHTN | Thuế TNCN | Lương Net. Header hiện Tag "Nháp" (text tertiary).
 4. Lan review từng dòng. Scroll table, sort theo phòng ban. Phát hiện một nhân viên chấm công thiếu → click tên → Employee Detail tab Chấm công → chỉnh sửa → back → "Tính lại" button.
 5. Mọi thứ đúng. Lan click "Xác nhận bảng lương" → Modal.confirm: "Xác nhận bảng lương tháng 6/2026? Sau khi xác nhận không thể chỉnh sửa."
 6. **Climax:** Xác nhận. Tag chuyển "Đã xác nhận" (`{colors.success}`). Table lock read-only. Hệ thống gửi phiếu lương cho 118 nhân viên qua email + in-app notification. Button "Xuất Excel" xuất hiện. Lan click → file `bang_luong_2026-06.xlsx` download. Từ tính toán đến phát lương — dưới 1 giờ thay vì 2-3 ngày Excel.
@@ -316,6 +333,6 @@ Failure: Tính lương fail (dữ liệu chấm công chưa đủ) → error mes
 2. Click vào "Nghỉ phép" → Step Builder page. Hiện chuỗi dọc: Step 1 "Employee" (fixed, không xoá được) → Step 2 "Manager" (Role Select) → Step 3 "HR Admin" (Role Select).
 3. Lan click "Thêm bước" giữa Employee và Manager. Step mới xuất hiện → Lan chọn Role: "Team Lead". Thêm condition (optional): `leave_days >= 3`.
 4. Preview chuỗi: "Employee → Team Lead (khi ≥ 3 ngày) → Manager → HR Admin".
-5. **Climax:** Lan bấm "Lưu". Toast: "Cập nhật quy trình thành công". Từ nay mọi đơn nghỉ phép ≥ 3 ngày trong công ty XYZ đi qua 4 bước. Đơn < 3 ngày bỏ qua Team Lead. Công ty khác không bị ảnh hưởng — mỗi tenant cấu hình riêng. Không cần developer, không cần config file — HR tự làm.
+5. **Climax:** Lan bấm "Lưu". Toast: "Cập nhật quy trình thành công". Từ nay mọi đơn nghỉ phép ≥ 3 ngày đi qua 4 bước. Đơn < 3 ngày bỏ qua Team Lead. Không cần developer, không cần config file — HR tự làm.
 
 Failure: Lưu workflow không có step nào sau Employee → `message.error("Cần ít nhất một bước duyệt")`. Xoá step cuối cùng (ngoài Employee) → Popconfirm cảnh báo.

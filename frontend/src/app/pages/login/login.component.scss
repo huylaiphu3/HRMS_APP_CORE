@@ -1,0 +1,34 @@
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06), 0 3px 10px rgba(15, 23, 42, 0.04);
+}
+
+.login-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #111827;
+  margin: 0 0 4px;
+}
+
+.login-desc {
+  font-size: 14px;
+  color: #667085;
+  margin: 0 0 32px;
+}
+
+.password-toggle {
+  cursor: pointer;
+  color: #98a3b3;
+}
+
+button[nz-button] {
+  height: 44px;
+  border-radius: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+}

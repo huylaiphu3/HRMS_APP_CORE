@@ -22,47 +22,44 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 ### Requirements Overview
 
 **Functional Requirements:**
-41 FRs across 14 features covering: Auth & RBAC (FR-1→3), Multi-tenant (FR-4→6), Employee Management (FR-7→9), Labor Contracts (FR-10→11), Attendance (FR-12→15), Leave Management (FR-16→18), Payroll (FR-19→24), Notifications (FR-25→26), Audit Log (FR-27→29), Employee Documents (FR-30→31), Dashboard (FR-32→34), Dynamic Approval Workflow (FR-35→37), Data Import (FR-38), Reports (FR-39→41).
+38 FRs across 13 features covering: Auth & RBAC (FR-1→3), Employee Management (FR-7→9), Labor Contracts (FR-10→11), Attendance (FR-12→15), Leave Management (FR-16→18), Payroll (FR-19→24), Notifications (FR-25→26), Audit Log (FR-27→29), Employee Documents (FR-30→31), Dashboard (FR-32→34), Dynamic Approval Workflow (FR-35→37), Data Import (FR-38), Reports (FR-39→41).
 
 Architecturally significant modules:
-- Multi-tenant isolation affects every layer (DB schema, repository queries, API security, file storage paths)
-- Dynamic Approval Workflow requires a state machine engine with configurable templates per-tenant per-module
+- Dynamic Approval Workflow requires a state machine engine with configurable templates per-module
 - Payroll engine needs configurable tax/insurance formulas with Vietnamese labor law compliance
 - Audit log requires AOP/interceptor pattern for automatic immutable recording across all entities
 
 **Non-Functional Requirements:**
-- Security: bcrypt (cost ≥ 12), JWT (access 30min + refresh 7d) with tenant_id, AES-256 at-rest encryption for sensitive data (CCCD), HTTPS mandatory, file upload whitelist validation
+- Security: bcrypt (cost ≥ 12), JWT (access 30min + refresh 7d), AES-256 at-rest encryption for sensitive data (CCCD), HTTPS mandatory, file upload whitelist validation
 - Performance: API < 2s @ 500 concurrent users, payroll 500 employees < 30s, Excel export < 10s for 500 rows
 - Deployment: Docker Compose (Spring Boot + MySQL + Angular + Nginx), auto DB migration, backup/restore scripts
-- Compliance: BHXH/BHYT/BHTN rates + PIT 7-bracket progressive tax configurable per-tenant, 3 contract types per Labor Code 2019, OT coefficients 1.5x/2.0x/3.0x
+- Compliance: BHXH/BHYT/BHTN rates + PIT 7-bracket progressive tax configurable, 3 contract types per Labor Code 2019, OT coefficients 1.5x/2.0x/3.0x
 
 **Scale & Complexity:**
 
 - Primary domain: Full-stack web application (SPA + REST API + RDBMS)
-- Complexity level: Medium-High
+- Complexity level: Medium
 - Estimated architectural components: 12–15
-- Target scale: 100 tenants × 500 employees/tenant on single instance
+- Target scale: 500 nhân viên trên single instance
 
 ### Technical Constraints & Dependencies
 
 - Stack updated: Java 21 / Spring Boot 4.0.x / MySQL 8.4 LTS / Angular 17.x (see Starter Template Evaluation)
-- Shared database multi-tenant (tenant_id column on every business table)
 - Infrastructure: VPS 4 vCPU / 8GB RAM minimum
 - File storage: Local filesystem V1 (50GB minimum), S3 migration path V2
-- Notification: SMTP shared across tenants V1, per-tenant SMTP V2
+- Notification: SMTP V1
 - Language: Vietnamese-only UI V1
 - Auth: username/password + JWT only (no SSO/LDAP V1)
-- One user = one role = one tenant (single-role constraint)
+- One user = one role (single-role constraint)
 
 ### Cross-Cutting Concerns Identified
 
-1. **Tenant Isolation** — Every repository query, API response, file path, and notification must be scoped by tenant_id. This is the #1 architectural risk — a single missed filter = data leak.
-2. **RBAC Authorization** — 4-tier role hierarchy (System Admin > Admin > Manager > Employee) with scope filtering (cross-tenant / tenant-wide / department / self-only).
-3. **Audit Logging** — Automatic immutable recording of all CUD operations with old/new values. Must be implemented as infrastructure (AOP/interceptor), not per-module code.
-4. **Soft Delete** — Entities are never hard-deleted. All queries must respect active/inactive status.
-5. **Event-Driven Notifications** — Business events (leave request, approval, payroll confirmation, contract expiry) trigger dual-channel notifications (email + in-app).
-6. **Vietnamese Labor Law Compliance** — Tax and insurance calculation formulas must be configurable per-tenant and correct to the decimal. This is a correctness requirement, not a performance one.
-7. **Pagination & Filtering** — All list endpoints support search, filter, pagination with tenant-scoped results.
+1. **RBAC Authorization** — 3-tier role hierarchy (Admin > Manager > Employee) with scope filtering (company-wide / department / self-only).
+2. **Audit Logging** — Automatic immutable recording of all CUD operations with old/new values. Must be implemented as infrastructure (AOP/interceptor), not per-module code.
+3. **Soft Delete** — Entities are never hard-deleted. All queries must respect active/inactive status.
+4. **Event-Driven Notifications** — Business events (leave request, approval, payroll confirmation, contract expiry) trigger dual-channel notifications (email + in-app).
+5. **Vietnamese Labor Law Compliance** — Tax and insurance calculation formulas must be configurable and correct to the decimal. This is a correctness requirement, not a performance one.
+6. **Pagination & Filtering** — All list endpoints support search, filter, pagination.
 
 ## Starter Template Evaluation
 
@@ -130,7 +127,7 @@ ng new hrms-frontend --style=scss --routing --strict --standalone
 
 **Built-in (không cần thêm):**
 - Angular Router — Client-side routing (built-in)
-- HttpClient + HttpInterceptor — HTTP client với JWT attach, tenant header (built-in)
+- HttpClient + HttpInterceptor — HTTP client với JWT attach (built-in)
 - Reactive Forms — Form handling và validation (built-in)
 - Angular Signals — Reactive state management (built-in từ Angular 17+)
 - RxJS — Async operations, HttpClient responses (built-in)
@@ -151,21 +148,19 @@ ng new hrms-frontend --style=scss --routing --strict --standalone
 ### Decision Priority Analysis
 
 **Critical Decisions (Block Implementation):**
-- Multi-tenant data isolation via repository query methods + BaseEntity
 - JWT auth with refresh token rotation
-- Spring Security filter chain with TenantContext
+- Spring Security filter chain
 - REST API conventions and error format
 
 **Important Decisions (Shape Architecture):**
 - Sensitive data encryption via JPA AttributeConverter
-- Caffeine in-memory caching for tenant config
+- Caffeine in-memory caching for dashboard stats
 - Frontend feature-module structure
 - Docker Compose service topology
 
 **Deferred Decisions (Post-MVP):**
 - Redis distributed cache (V2 — when scaling beyond single instance)
 - WebSocket/SSE real-time notifications (V2)
-- Database-per-tenant migration (V3+)
 - Cloud storage S3 integration (V2)
 
 ### Data Architecture
@@ -173,45 +168,39 @@ ng new hrms-frontend --style=scss --routing --strict --standalone
 **Base Entity Strategy:**
 Abstract `BaseEntity` class inherited by all business entities:
 - `id` (Long, @GeneratedValue AUTO_INCREMENT)
-- `tenantId` (String, set automatically from TenantContext — not editable after creation)
 - `active` (Boolean, default true — soft delete flag)
 - `createdAt` (LocalDateTime, @CreatedDate)
 - `updatedAt` (LocalDateTime, @LastModifiedDate)
 - `createdBy` (Long, @CreatedBy — user_id from SecurityContext)
 - `updatedBy` (Long, @LastModifiedBy)
 
-Tenant isolation enforced at repository level: all repository methods include `tenantId` parameter (e.g., `findByTenantId()`, `findByIdAndTenantId()`). Service layer always passes `TenantContext.getTenantId()` to repository calls. System Admin endpoints bypass by querying without tenantId constraint. No Hibernate @Filter — explicit, transparent, easy to debug.
-
-Soft delete: `@Where(clause = "active = true")` on BaseEntity. Hard delete never exposed via API.
+Soft delete: `@SQLRestriction("active = true")` on BaseEntity. Hard delete never exposed via API.
 
 **Sensitive Data Encryption:**
 JPA `@Convert(converter = AesEncryptConverter.class)` on sensitive fields (CCCD number). AES-256-GCM encryption. Key loaded from environment variable `ENCRYPTION_KEY`. Converter handles encrypt on write, decrypt on read — transparent to business code. Encrypted fields stored as Base64 strings in DB (VARCHAR). Salary fields lưu plaintext `DECIMAL(15,0)` — không mã hoá.
 
 **Caching Strategy:**
 Spring Cache + Caffeine (in-memory, single-instance):
-- Tenant configuration: cache 1 hour, evict on tenant config update
 - Dashboard aggregates: cache 5 minutes, evict on relevant data changes
 - Leave balances: cache per-request (avoid repeated queries within payroll calculation)
 - No distributed cache in V1 — Caffeine is sufficient for single-instance deployment
 
 **Database Migration:**
-Hibernate `ddl-auto=update` for dev environment, `ddl-auto=validate` for prod. Schema changes in production managed via versioned SQL scripts (`src/main/resources/db/migration/V{N}__{description}.sql`) executed manually or via a startup ApplicationRunner. Seed data (default roles, system admin account, default tax brackets) in `data.sql`.
+Hibernate `ddl-auto=update` for dev environment, `ddl-auto=validate` for prod. Schema changes in production managed via versioned SQL scripts (`src/main/resources/db/migration/V{N}__{description}.sql`) executed manually or via a startup ApplicationRunner. Seed data (default admin account, default tax brackets) in `data.sql`.
 
 ### Authentication & Security
 
 **JWT Implementation:**
 - Library: jjwt (io.jsonwebtoken)
-- Access token: HMAC-SHA256 signed, 30-minute TTL. Payload: `{ sub: userId, tenantId, role, iat, exp }`
-- Refresh token: UUID stored in `refresh_tokens` table (columns: token, user_id, tenant_id, expires_at, revoked). TTL 7 days.
+- Access token: HMAC-SHA256 signed, 30-minute TTL. Payload: `{ sub: userId, role, iat, exp }`
+- Refresh token: UUID stored in `refresh_tokens` table (columns: token, user_id, expires_at, revoked). TTL 7 days.
 - Refresh flow: client sends refresh token → server validates in DB → issues new access + refresh token → old refresh token marked revoked (rotation).
 - JWT secret: loaded from env variable `JWT_SECRET` (minimum 256-bit).
 
 **Spring Security Filter Chain:**
-1. `JwtAuthenticationFilter` (extends `OncePerRequestFilter`): extracts JWT from `Authorization: Bearer` header → validates signature + expiration → creates `TenantUserDetails` (userId, tenantId, role, departmentId) → sets `SecurityContextHolder`.
-2. `TenantContext` (ThreadLocal): populated by `JwtAuthenticationFilter` with tenantId. Cleared in filter's `finally` block. Service layer reads `TenantContext.getTenantId()` and passes to repository methods explicitly.
-3. Endpoint authorization: `@PreAuthorize("hasRole('ADMIN')")` and custom method-level annotations for department-scoped access.
-4. System Admin endpoints (`/api/v1/admin/**`): require `SYSTEM_ADMIN` role, query without tenantId constraint.
-5. Public endpoints: only `/api/v1/auth/login` and `/api/v1/auth/refresh`.
+1. `JwtAuthenticationFilter` (extends `OncePerRequestFilter`): extracts JWT from `Authorization: Bearer` header → validates signature + expiration → creates `CustomUserDetails` (userId, role, departmentId) → sets `SecurityContextHolder`.
+2. Endpoint authorization: `@PreAuthorize("hasRole('ADMIN')")` and custom method-level annotations for department-scoped access.
+3. Public endpoints: only `/api/v1/auth/login` and `/api/v1/auth/refresh`.
 
 **CORS Policy:**
 Configured in `WebSecurityConfig`:
@@ -228,8 +217,6 @@ BCryptPasswordEncoder with strength 12 (cost factor). Default password for new a
 **REST API Convention:**
 - Base path: `/api/v1/`
 - Resource naming: plural nouns, kebab-case (`/api/v1/users`, `/api/v1/leave-requests`)
-- Tenant scoping: implicit from JWT (no tenant_id in URL)
-- System Admin: `/api/v1/admin/tenants`, `/api/v1/admin/tenants/{id}/stats`
 - Nested resources: `/api/v1/users/{id}/contracts`, `/api/v1/users/{id}/documents`
 - Actions: POST for commands (`/api/v1/payroll/generate`, `/api/v1/attendance/check-in`)
 
@@ -284,10 +271,10 @@ src/
       models/            # Global TypeScript interfaces
       utils/             # Helpers (date formatting, currency, validators)
     core/                # Singleton services, guards, interceptors
-      services/          # AuthService, TenantService, NotificationService
+      services/          # AuthService, NotificationService
       interceptors/      # JwtInterceptor, ErrorInterceptor
       guards/            # RoleGuard, AuthGuard
-    layouts/             # AdminLayout, EmployeeLayout, SystemAdminLayout
+    layouts/             # AdminLayout, EmployeeLayout
     features/            # Feature modules (lazy-loaded)
       auth/              # Login, password reset
       user/              # User/Employee CRUD, search
@@ -302,8 +289,7 @@ src/
       workflow/          # Approval workflow config
       import/            # Excel import
       report/            # Reports + Excel export
-      settings/          # Tenant settings, user management
-      admin/             # System Admin — tenant management
+      settings/          # Company settings, user management
     app.component.ts
     app.config.ts
     app.routes.ts
@@ -314,10 +300,10 @@ src/
 ```
 
 **Auth State & Route Guards:**
-- `AuthService` (Angular Service + Signals): stores user, tokens, tenant info via `signal()`. Persisted in localStorage.
+- `AuthService` (Angular Service + Signals): stores user and tokens via `signal()`. Persisted in localStorage.
 - `JwtInterceptor` (HttpInterceptor): attaches `Authorization: Bearer` header on every request. On 401 → attempt token refresh → if fail → redirect to login.
 - `RoleGuard` (CanActivate): checks role from AuthService. Unauthorized → redirect to dashboard or 403 page.
-- Route structure: `/login`, `/dashboard`, `/employees`, `/leave-requests`, `/payroll`, `/settings`, `/admin/tenants` (System Admin only).
+- Route structure: `/login`, `/dashboard`, `/employees`, `/leave-requests`, `/payroll`, `/settings`.
 - Lazy loading: feature modules loaded on demand via `loadComponent`/`loadChildren` in route config.
 
 **Form Handling:**
@@ -374,8 +360,8 @@ services:
 
 **Implementation Sequence:**
 1. Project scaffolding (Spring Initializr + Angular CLI) + Docker Compose setup
-2. BaseEntity + TenantContext + tenant-scoped repository methods (foundation for all entities)
-3. JWT auth + Spring Security filter chain + user/role/tenant entities
+2. BaseEntity + repository methods (foundation for all entities)
+3. JWT auth + Spring Security filter chain + user/role entities
 4. Core modules build on top: User (profile + auth) → Contract → Attendance → Leave → Payroll
 5. Cross-cutting: Audit log AOP, notification service, caching
 6. Frontend: auth flow → layouts → feature modules in parallel with backend
@@ -383,10 +369,9 @@ services:
 8. Import (depends on employee module)
 
 **Cross-Component Dependencies:**
-- TenantContext ← JwtAuthenticationFilter ← Every service (passes tenantId to repository)
 - AuditLogAspect ← Every entity CUD operation
 - NotificationService ← Leave approval, payroll confirmation, contract expiry
-- PayrollService ← AttendanceService + LeaveService + TenantConfigService
+- PayrollService ← AttendanceService + LeaveService + ConfigService
 - ApprovalWorkflowEngine ← LeaveService (V1), extensible to OT/expense (V2)
 
 ## Implementation Patterns & Consistency Rules
@@ -395,10 +380,10 @@ services:
 
 **Database Naming Conventions:**
 - Tables: `snake_case`, plural — `users`, `leave_requests`, `audit_logs`, `approval_steps`
-- Columns: `snake_case` — `tenant_id`, `created_at`, `user_id`, `base_salary`
-- Foreign keys: `{referenced_table_singular}_id` — `user_id`, `department_id`, `tenant_id`
-- Indexes: `idx_{table}_{columns}` — `idx_users_tenant_id`, `idx_leave_requests_status_tenant_id`
-- Unique constraints: `uk_{table}_{columns}` — `uk_users_cccd_tenant_id`
+- Columns: `snake_case` — `created_at`, `user_id`, `base_salary`
+- Foreign keys: `{referenced_table_singular}_id` — `user_id`, `department_id`
+- Indexes: `idx_{table}_{columns}` — `idx_users_email`, `idx_leave_requests_status`
+- Unique constraints: `uk_{table}_{columns}` — `uk_users_cccd`, `uk_users_email`
 - Join tables: `{table1}_{table2}` alphabetically — `user_allowances`
 
 **Java Code Naming Conventions:**
@@ -430,7 +415,6 @@ services:
 - Endpoints: kebab-case, plural nouns — `/api/v1/users`, `/api/v1/leave-requests`
 - JSON fields: `camelCase` — `{ "userId": 1, "firstName": "Minh", "createdAt": "..." }`
 - Query params: `camelCase` — `?departmentId=5&status=active&page=0&size=20`
-- Tenant scoping: implicit from JWT, never in URL path
 
 ### Structure Patterns
 
@@ -440,7 +424,7 @@ com.hrms/
   common/
     entity/          # BaseEntity
     dto/             # ApiResponse<T>, PageData<T>
-    security/        # JwtFilter, TenantContext, SecurityConfig
+    security/        # JwtFilter, SecurityConfig, CustomUserDetails
     audit/           # AuditLogAspect, AuditLog entity
     config/          # CacheConfig, CorsConfig, SwaggerConfig
     exception/       # GlobalExceptionHandler, BusinessException, ResourceNotFoundException
@@ -459,7 +443,6 @@ com.hrms/
   notification/
   document/
   report/
-  tenant/
 ```
 
 **Test Location:** `src/test/java/com/hrms/{module}/` mirrors main. Naming: `{Class}Test.java` (unit), `{Class}IntegrationTest.java` (integration).
@@ -515,7 +498,7 @@ public class ApiResponse<T> {
 
 **Application Events (Spring):**
 - Event class naming: `{Entity}{Action}Event` — `LeaveRequestCreatedEvent`, `PayrollConfirmedEvent`
-- Payload: `{ entityId, tenantId, actorId, ...relevant data }`
+- Payload: `{ entityId, actorId, ...relevant data }`
 - Published via `ApplicationEventPublisher.publishEvent()`
 - Listeners: `@EventListener` in NotificationService, AuditLogService
 - Email sending: `@Async` on listener methods
@@ -529,7 +512,7 @@ public class ApiResponse<T> {
 ### Process Patterns
 
 **Error Handling (Backend):**
-- Custom exceptions extend `RuntimeException`: `BusinessException(int code, String message)`, `ResourceNotFoundException`, `TenantAccessDeniedException`
+- Custom exceptions extend `RuntimeException`: `BusinessException(int code, String message)`, `ResourceNotFoundException`
 - `@ControllerAdvice GlobalExceptionHandler` catches all → returns `ApiResponse<Void>` with appropriate code
 - Never expose stack traces in API
 - Log full exception server-side at ERROR level
@@ -555,16 +538,15 @@ public class ApiResponse<T> {
 ### Enforcement Guidelines
 
 **All AI Agents MUST:**
-1. Extend `BaseEntity` for every business entity (automatic tenant_id, soft delete, audit fields)
-2. Every repository method for business entities must include `tenantId` parameter — never query without tenant scope (except System Admin)
-3. Follow naming conventions exactly: snake_case DB, camelCase Java/JSON, PascalCase components
-4. Return `ApiResponse<T>` from every controller method — no raw objects
-5. Throw custom exceptions from service layer, never return error codes
-6. Use Angular `HttpClient` for all API calls — no `fetch/axios`. Consume via `async` pipe or `toSignal()`
-7. Use NG-ZORRO components exclusively — no mixing UI libraries
-8. Create DTOs for request/response — never expose entities directly in API
-9. Write service interface + implementation — controllers call interfaces only
-10. Place code in the correct package/module — no cross-module direct entity access (use service calls)
+1. Extend `BaseEntity` for every business entity (automatic soft delete, audit fields)
+2. Follow naming conventions exactly: snake_case DB, camelCase Java/JSON, PascalCase components
+3. Return `ApiResponse<T>` from every controller method — no raw objects
+4. Throw custom exceptions from service layer, never return error codes
+5. Use Angular `HttpClient` for all API calls — no `fetch/axios`. Consume via `async` pipe or `toSignal()`
+6. Use NG-ZORRO components exclusively — no mixing UI libraries
+7. Create DTOs for request/response — never expose entities directly in API
+8. Write service interface + implementation — controllers call interfaces only
+9. Place code in the correct package/module — no cross-module direct entity access (use service calls)
 
 ## Project Structure & Boundaries
 
@@ -589,15 +571,14 @@ hrms/
 │   │   │   │   │   ├── entity/BaseEntity.java
 │   │   │   │   │   ├── dto/ApiResponse.java, PageData.java
 │   │   │   │   │   ├── security/SecurityConfig.java, JwtAuthenticationFilter.java,
-│   │   │   │   │   │   JwtTokenProvider.java, TenantContext.java,
-│   │   │   │   │   │   TenantUserDetails.java
+│   │   │   │   │   │   JwtUtil.java, CustomUserDetails.java
 │   │   │   │   │   ├── audit/AuditLog.java, AuditLogRepository.java, AuditLogAspect.java,
 │   │   │   │   │   │   AuditLogService.java, AuditLogController.java
 │   │   │   │   │   ├── scheduler/ScheduledTaskConfig.java, ContractExpiryJob.java,
 │   │   │   │   │   │   LeaveBalanceResetJob.java
 │   │   │   │   │   ├── config/CacheConfig.java, CorsConfig.java, SwaggerConfig.java, AsyncConfig.java
 │   │   │   │   │   ├── exception/GlobalExceptionHandler.java, BusinessException.java,
-│   │   │   │   │   │   ResourceNotFoundException.java, TenantAccessDeniedException.java
+│   │   │   │   │   │   ResourceNotFoundException.java
 │   │   │   │   │   └── util/AesEncryptConverter.java, ExcelUtils.java, DateUtils.java
 │   │   │   │   ├── user/
 │   │   │   │   │   ├── entity/User.java, Role.java (enum), Department.java,
@@ -608,9 +589,6 @@ hrms/
 │   │   │   │   │   ├── controller/UserController.java, AuthController.java
 │   │   │   │   │   └── dto/UserCreateRequest.java, UserResponse.java, UserMapper.java,
 │   │   │   │   │       LoginRequest.java, LoginResponse.java, RefreshTokenRequest.java
-│   │   │   │   ├── tenant/
-│   │   │   │   │   ├── entity/Tenant.java, TenantConfig.java
-│   │   │   │   │   ├── repository/ service/ controller/ dto/
 │   │   │   │   ├── contract/
 │   │   │   │   │   ├── entity/LaborContract.java, ContractType.java (enum)
 │   │   │   │   │   ├── repository/ service/ controller/ dto/
@@ -675,10 +653,10 @@ hrms/
 │   │   │   │   ├── models/api-response.model.ts, common.model.ts
 │   │   │   │   └── utils/date.utils.ts, currency.utils.ts, validators.ts
 │   │   │   ├── core/
-│   │   │   │   ├── services/auth.service.ts, tenant.service.ts, notification.service.ts
+│   │   │   │   ├── services/auth.service.ts, notification.service.ts
 │   │   │   │   ├── interceptors/jwt.interceptor.ts, error.interceptor.ts
 │   │   │   │   └── guards/role.guard.ts, auth.guard.ts
-│   │   │   ├── layouts/admin-layout/, employee-layout/, system-admin-layout/
+│   │   │   ├── layouts/admin-layout/, employee-layout/
 │   │   │   ├── features/
 │   │   │   │   ├── auth/          (components/ services/ models/ auth.routes.ts)
 │   │   │   │   ├── user/           (components/ services/ models/ user.routes.ts)
@@ -693,8 +671,7 @@ hrms/
 │   │   │   │   ├── workflow/      (components/ services/ models/ workflow.routes.ts)
 │   │   │   │   ├── import/        (components/ services/ models/ import.routes.ts)
 │   │   │   │   ├── report/        (components/ services/ models/ report.routes.ts)
-│   │   │   │   ├── settings/      (components/ services/ models/ settings.routes.ts)
-│   │   │   │   └── admin/         (components/ services/ models/ admin.routes.ts)
+│   │   │   │   └── settings/      (components/ services/ models/ settings.routes.ts)
 │   │   ├── environments/environment.ts, environment.prod.ts
 │   │   ├── styles.scss
 │   │   └── index.html
@@ -710,7 +687,6 @@ hrms/
 | FR Range | Module | Backend Package | Frontend Feature |
 |----------|--------|----------------|-----------------|
 | FR-1→3 | Auth & RBAC | `user/` (AuthService, AuthController) + `common/security/` | `features/auth/` |
-| FR-4→6 | Multi-tenant | `tenant/` + `common/security/` | `features/admin/` + `features/settings/` |
 | FR-7→9 | User/Employee | `user/` (UserService, UserController) | `features/user/` |
 | FR-10→11 | Contract | `contract/` | `features/contract/` |
 | FR-12→15 | Attendance | `attendance/` | `features/attendance/` |
@@ -728,11 +704,10 @@ hrms/
 
 | Concern | Location |
 |---------|----------|
-| Tenant isolation | `common/security/TenantContext.java` + `BaseEntity.java` + tenant-scoped repository methods |
 | RBAC | `common/security/SecurityConfig.java` + `@PreAuthorize` on controllers |
 | Audit logging | `common/audit/AuditLogAspect.java` — auto-intercepts all `@Service` CUD methods. `AuditLogController` for FR-28 viewing. |
 | Scheduled tasks | `common/scheduler/` — `ContractExpiryJob` (FR-11 daily), `LeaveBalanceResetJob` (FR-18 annual) |
-| Soft delete | `BaseEntity.active` + Hibernate `@Where` clause |
+| Soft delete | `BaseEntity.active` + Hibernate `@SQLRestriction` clause |
 | Notifications | `notification/service/` — listens to Spring `ApplicationEvent` from other modules |
 | Encryption | `common/util/AesEncryptConverter.java` — `@Convert` on entity fields |
 
@@ -741,7 +716,7 @@ hrms/
 **Allowed module dependencies:**
 - `common` ← all modules (shared infrastructure)
 - `leave` → `workflow` (leave request triggers approval pipeline)
-- `payroll` → `attendance`, `leave`, `tenant` (data aggregation for payroll calculation)
+- `payroll` → `attendance`, `leave` (data aggregation for payroll calculation)
 - `dashboard` → `user`, `payroll`, `leave`, `contract` (read-only aggregation)
 - `report` → `user`, `attendance`, `payroll` (read-only)
 - `notification` ← event listeners only (no direct imports — event-driven decoupling)
@@ -758,7 +733,6 @@ hrms/
 [Angular SPA] → HTTP/JSON → [Nginx] → reverse proxy → [Spring Boot API]
                                                           ↓
                                                    [JwtAuthFilter]
-                                                   [TenantContext set]
                                                           ↓
                                                    [Controller → Service → Repository]
                                                           ↓                    ↓
@@ -783,9 +757,8 @@ hrms/
 
 ### Requirements Coverage ✅
 
-**All 41 FRs mapped to architectural components:**
+**All 38 FRs mapped to architectural components:**
 - FR-1→3 (Auth): user/ (AuthService, AuthController) + common/security/
-- FR-4→6 (Multi-tenant): tenant/ + common/security/ (BaseEntity + TenantContext)
 - FR-7→9 (User/Employee): user/ (UserService, UserController)
 - FR-10→11 (Contract): contract/ + common/scheduler/ContractExpiryJob
 - FR-12→15 (Attendance): attendance/
@@ -800,10 +773,10 @@ hrms/
 - FR-39→41 (Reports): report/
 
 **NFR Coverage:**
-- Security: bcrypt(12) ✓, JWT ✓, AES-256 AttributeConverter ✓, HTTPS (nginx) ✓, file whitelist ✓, tenant isolation ✓
-- Performance: Caffeine cache ✓, tenant_id indexes ✓, payroll 30s budget ✓, Pageable pagination ✓
+- Security: bcrypt(12) ✓, JWT ✓, AES-256 AttributeConverter ✓, HTTPS (nginx) ✓, file whitelist ✓
+- Performance: Caffeine cache ✓, DB indexes ✓, payroll 30s budget ✓, Pageable pagination ✓
 - Deployment: Docker Compose ✓, Hibernate DDL ✓, profiles (dev/prod/test) ✓
-- Compliance: configurable rates per-tenant ✓, 3 contract types ✓, OT coefficients ✓, immutable audit ✓
+- Compliance: configurable rates ✓, 3 contract types ✓, OT coefficients ✓, immutable audit ✓
 
 ### Gaps Found & Resolved
 
@@ -816,14 +789,14 @@ hrms/
 
 **Requirements Analysis**
 - [x] Project context thoroughly analyzed
-- [x] Scale and complexity assessed (medium-high, 100 tenants × 500 employees)
+- [x] Scale and complexity assessed (medium, 500 nhân viên)
 - [x] Technical constraints identified (stack, infrastructure, single-instance)
-- [x] Cross-cutting concerns mapped (7 concerns + scheduled tasks)
+- [x] Cross-cutting concerns mapped (6 concerns + scheduled tasks)
 
 **Architectural Decisions**
 - [x] Critical decisions documented with versions (Spring Boot 4.0.x, Java 21, MySQL 8.4, Angular 17)
 - [x] Technology stack fully specified (13 backend + 3 frontend dependencies + Angular built-ins)
-- [x] Integration patterns defined (event-driven notifications, REST API, tenant-scoped repositories)
+- [x] Integration patterns defined (event-driven notifications, REST API)
 - [x] Performance considerations addressed (Caffeine cache, DB indexes, pagination)
 
 **Implementation Patterns**
@@ -836,7 +809,7 @@ hrms/
 - [x] Complete directory structure defined (backend + frontend + docker + nginx)
 - [x] Component boundaries established (module dependencies, forbidden imports)
 - [x] Integration points mapped (data flow diagram, event listeners)
-- [x] Requirements to structure mapping complete (41 FRs → packages/features)
+- [x] Requirements to structure mapping complete (38 FRs → packages/features)
 
 ### Architecture Readiness Assessment
 
@@ -845,9 +818,8 @@ hrms/
 **Confidence Level:** High
 
 **Key Strengths:**
-- Multi-tenant isolation baked into infrastructure (BaseEntity + tenant-scoped repository methods) — explicit tenantId in every query
 - Unified ApiResponse<T> { code, message, data } eliminates API format inconsistency
-- 10 clear enforcement rules for AI agents
+- 9 clear enforcement rules for AI agents
 - Complete FR → Structure mapping ensures nothing is missed during implementation
 - Event-driven notification decouples business modules from notification logic
 - Scheduled tasks handle time-based business rules (contract expiry, leave reset)
@@ -855,7 +827,6 @@ hrms/
 **Areas for Future Enhancement (V2+):**
 - Redis distributed cache when scaling beyond single instance
 - WebSocket/SSE for real-time notifications
-- Database-per-tenant isolation
 - Cloud storage (S3) for documents
 - CI/CD pipeline configuration
 - API rate limiting
@@ -868,13 +839,12 @@ hrms/
 - Respect project structure and module boundaries
 - Return ApiResponse<T> from every controller — no exceptions
 - Extend BaseEntity for every business entity
-- Never bypass TenantContext — always pass tenantId to repository methods
 
 **First Implementation Priority:**
 1. Generate backend via Spring Initializr (Spring Boot 4.0.x, Java 21, Maven)
 2. Generate frontend via `ng new hrms-frontend --style=scss --routing --strict --standalone` + install ng-zorro-antd
 3. Set up Docker Compose (mysql + backend + nginx)
-4. Implement BaseEntity + TenantContext + tenant-scoped repository methods
+4. Implement BaseEntity + repository methods
 5. Implement JWT auth + Spring Security filter chain
 6. Build core modules: User (profile + auth) → Contract → Attendance → Leave → Payroll
 7. Cross-cutting: AuditLogAspect, NotificationService, Scheduler jobs

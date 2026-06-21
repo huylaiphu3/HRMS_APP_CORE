@@ -17,41 +17,38 @@ This document provides the complete epic and story breakdown for HRMS, decomposi
 
 ### Functional Requirements
 
-FR-1: Đăng nhập bằng username/password — trả JWT access token (30 phút) + refresh token (7 ngày). JWT payload: user_id, tenant_id, role. Sai 5 lần → khóa 15 phút.
-FR-2: Phân quyền RBAC — 4 vai trò (System Admin, Admin, Manager, Employee). Tenant_id filter mọi request. Employee → 403 khi truy cập ngoài scope. Manager chỉ thấy phòng ban mình.
-FR-3: Quản lý tài khoản — Admin tạo/vô hiệu hóa/reset password trong tenant. Tạo nhân viên → auto tạo tài khoản + gửi email.
-FR-4: Tenant Management — System Admin tạo/xem/vô hiệu hóa Tenant. Tạo → sinh tenant_id + Admin account đầu tiên.
-FR-5: Tenant Data Isolation — tenant_id column trên mọi bảng. Application layer enforce filter. Shared DB approach.
-FR-6: Tenant Configuration — mỗi Tenant config riêng: giờ làm, IP Whitelist, BHXH/BHYT/BHTN rates, biểu thuế, phụ cấp.
+FR-1: Đăng nhập bằng username/password — trả JWT access token (30 phút) + refresh token (7 ngày). JWT payload: user_id, role. Sai 5 lần → khóa 15 phút.
+FR-2: Phân quyền RBAC — 3 vai trò (Admin, Manager, Employee). Employee → 403 khi truy cập ngoài scope. Manager chỉ thấy phòng ban mình.
+FR-3: Quản lý tài khoản — Admin tạo/vô hiệu hóa/reset password. Tạo nhân viên → auto tạo tài khoản + gửi email.
 FR-7: CRUD Nhân viên — tạo/xem/sửa/vô hiệu hóa. Mã nhân viên tự sinh. Soft delete only. Bắt buộc: họ tên, CCCD, ngày sinh, giới tính, phòng ban, chức vụ, ngày vào làm.
 FR-8: Quản lý Phòng ban & Chức vụ — CRUD phòng ban/chức vụ. Xóa phòng ban có NV → từ chối. Mỗi phòng ban có 1 Manager.
-FR-9: Tìm kiếm & Lọc nhân viên — partial match, không phân biệt hoa thường. Filter phòng ban + trạng thái. Chỉ trong tenant.
+FR-9: Tìm kiếm & Lọc nhân viên — partial match, không phân biệt hoa thường. Filter phòng ban + trạng thái.
 FR-10: CRUD Hợp đồng — 3 loại (Thử việc, Xác định thời hạn ≤36 tháng, Không xác định thời hạn). Bắt buộc: loại, ngày BĐ/KT, lương. Tạo mới → cũ chuyển "Đã kết thúc".
 FR-11: Cảnh báo hết hạn hợp đồng — thông báo Admin 30 ngày trước. Email + in-app. Dashboard hiển thị danh sách.
 FR-12: Check-in / Check-out — IP whitelist validate. Chỉ 1 lần check-in/ngày. Check-out phải sau check-in. Admin chỉnh sửa bổ sung cho NV.
-FR-13: Quản lý IP Whitelist — Admin CRUD IP per-tenant. Có hiệu lực ngay. Whitelist rỗng → fail-safe.
-FR-14: Quy tắc đi muộn / về sớm — trễ >15 phút = đi muộn, sớm >15 phút = về sớm. Giờ chuẩn config per-tenant (mặc định 8:00-17:00).
+FR-13: Quản lý IP Whitelist — Admin CRUD IP per-module. Có hiệu lực ngay. Whitelist rỗng → fail-safe.
+FR-14: Quy tắc đi muộn / về sớm — trễ >15 phút = đi muộn, sớm >15 phút = về sớm. Giờ chuẩn config per-module (mặc định 8:00-17:00).
 FR-15: Bảng tổng hợp công tháng — tổng ngày công, đi muộn, về sớm, nghỉ phép, vắng. Employee/Manager/Admin scope khác nhau.
 FR-16: Gửi đơn nghỉ phép — chọn loại (5 loại), ngày BĐ/KT, lý do. Hết phép năm → cảnh báo chuyển không lương. Ngày BĐ < hiện tại → từ chối.
-FR-17: Duyệt / Từ chối đơn nghỉ phép — theo Approval Workflow Template per-tenant. Tuần tự. Reject → dừng pipeline + thông báo. Default: Employee → Manager → HR.
+FR-17: Duyệt / Từ chối đơn nghỉ phép — theo Approval Workflow Template per-module. Tuần tự. Reject → dừng pipeline + thông báo. Default: Employee → Manager → HR.
 FR-18: Quản lý số dư phép — auto cấp phép năm đầu năm (12 ngày mặc định). Pro-rata cho NV mới. Tăng theo thâm niên (+1/5năm). Admin chỉnh tay. Reset đầu năm (carry-over optional).
-FR-19: Cấu hình thông số lương — per-tenant: BHXH/BHYT/BHTN rates, biểu thuế TNCN 7 bậc, giảm trừ gia cảnh, lương tối thiểu vùng.
+FR-19: Cấu hình thông số lương — per-module: BHXH/BHYT/BHTN rates, biểu thuế TNCN 7 bậc, giảm trừ gia cảnh, lương tối thiểu vùng.
 FR-20: Cấu hình phụ cấp — tạo loại phụ cấp (cố định hoặc % lương). Gán theo NV/phòng ban/chức vụ.
 FR-21: Ghi nhận OT — Admin nhập giờ OT. Hệ số: 1.5x (thường), 2.0x (cuối tuần), 3.0x (lễ). Lương giờ = cơ bản / 22 / 8.
 FR-22: Tạo bảng lương tháng — auto tính: lương cơ bản × (công TT/công chuẩn) + phụ cấp + OT - BH - thuế = net. Draft → review → xác nhận (lock).
 FR-23: Tính thuế TNCN lũy tiến — 7 bậc trên thu nhập chịu thuế. Thu nhập CT = tính thuế - giảm trừ GC - BH. CT ≤ 0 → thuế = 0.
 FR-24: Phiếu lương & Xuất Excel — NV xem chi tiết. Xác nhận → gửi email + in-app. Admin xuất Excel tổng hợp.
-FR-25: Thông báo in-app — polling 30s. Badge đỏ. Click → đánh dấu đã đọc + navigate. Phân trang, sắp xếp thời gian. Scoped tenant.
+FR-25: Thông báo in-app — polling 30s. Badge đỏ. Click → đánh dấu đã đọc + navigate. Phân trang, sắp xếp thời gian.
 FR-26: Thông báo email — sự kiện: nghỉ phép (gửi/duyệt/từ chối), hợp đồng hết hạn, phiếu lương, tài khoản mới. SMTP chung V1.
-FR-27: Ghi nhận audit log tự động — mọi CREATE/UPDATE/DELETE. Ghi: user_id, tenant_id, timestamp, entity, action, old_value, new_value. Immutable.
-FR-28: Xem & Tra cứu audit log — filter: module, user, NV liên quan, thời gian, action. Phân trang. Chỉ tenant hiện tại.
+FR-27: Ghi nhận audit log tự động — mọi CREATE/UPDATE/DELETE. Ghi: user_id, user_id, timestamp, entity, action, old_value, new_value. Immutable.
+FR-28: Xem & Tra cứu audit log — filter: module, user, NV liên quan, thời gian, action. Phân trang.
 FR-29: Login History — ghi đăng nhập: user, thời gian, IP, user agent, success/fail + lý do.
-FR-30: Upload tài liệu NV — PDF/JPG/PNG/DOCX. 10MB/file, 20 file/NV. Lưu tenant_id/employee_id/. Trùng tên → đổi tên auto.
-FR-31: Quản lý & Xem tài liệu — Admin xem/download/xóa. Employee xem/download cá nhân. Soft delete. Kiểm tra quyền (tenant + role).
+FR-30: Upload tài liệu NV — PDF/JPG/PNG/DOCX. 10MB/file, 20 file/NV. Lưu user_id/employee_id/. Trùng tên → đổi tên auto.
+FR-31: Quản lý & Xem tài liệu — Admin xem/download/xóa. Employee xem/download cá nhân. Soft delete. Kiểm tra quyền (role-based).
 FR-32: HR Dashboard — tổng NV active, mới tháng, nghỉ việc tháng, biến động. Danh sách HĐ hết hạn. Đơn chờ duyệt.
 FR-33: Payroll Dashboard — tổng chi phí lương tháng, so sánh tháng trước (%). Phân bổ theo phòng ban.
 FR-34: Leave Dashboard — Admin: tổng nghỉ phép tháng, theo loại, phòng ban nghỉ nhiều nhất. Manager: phòng ban mình. Lịch nghỉ team.
-FR-35: Cấu hình Approval Workflow Template — Admin tạo/sửa per-tenant, per-module. Chuỗi bước tuần tự. Thay đổi chỉ áp dụng đơn mới. Mỗi module 1 workflow active.
+FR-35: Cấu hình Approval Workflow Template — Admin tạo/sửa per-module, per-module. Chuỗi bước tuần tự. Thay đổi chỉ áp dụng đơn mới. Mỗi module 1 workflow active.
 FR-36: Thực thi Approval Workflow — gửi request → auto tạo pipeline theo template. Tuần tự approve. Reject → dừng + thông báo. Employee xem pipeline status.
 FR-37: Mặc định và Fallback — chưa config → default Employee → Manager → HR. Xóa custom → revert. Approver unavailable → escalate Admin.
 FR-38: Import nhân viên từ Excel — template download. Upload → tạo hàng loạt. Dòng lỗi → skip + báo chi tiết. 500 dòng/lần.
@@ -62,22 +59,20 @@ FR-41: Báo cáo bảng lương tháng — chỉ tháng đã xác nhận. Mỗi 
 ### NonFunctional Requirements
 
 NFR-1: Password hash bcrypt (cost factor ≥ 12).
-NFR-2: JWT access token TTL 30 phút, refresh token TTL 7 ngày. JWT chứa tenant_id để enforce isolation.
+NFR-2: JWT access token TTL 30 phút, refresh token TTL 7 ngày.
 NFR-3: Tất cả API yêu cầu authentication (trừ login và refresh endpoint).
 NFR-4: Dữ liệu nhạy cảm (CCCD) mã hóa AES-256-GCM at-rest. Salary lưu plaintext DECIMAL(15,0).
 NFR-5: HTTPS bắt buộc cho production.
-NFR-6: Tenant isolation — application layer enforce tenant_id filter trên mọi query. Không query nào chạy không có WHERE tenant_id (trừ System Admin).
 NFR-7: File upload validate type (whitelist PDF/JPG/PNG/DOCX), size limit (10MB), lưu ngoài webroot.
-NFR-8: API response < 2 giây cho list views và form submissions với 500 concurrent users (across all tenants).
-NFR-9: Tính bảng lương 500 nhân viên/tenant < 30 giây.
+NFR-8: API response < 2 giây cho list views và form submissions với 500 concurrent users.
+NFR-9: Tính bảng lương 500 nhân viên < 30 giây.
 NFR-10: Xuất Excel < 10 giây cho 500 dòng.
-NFR-11: Database index trên tenant_id cho mọi bảng nghiệp vụ.
 NFR-12: Docker Compose cho toàn bộ stack (Spring Boot + MySQL + Angular + Nginx).
 NFR-13: Tài liệu triển khai step-by-step cho người có kiến thức Docker cơ bản.
 NFR-14: One-command deploy: docker compose up -d.
 NFR-15: Database migration tự động khi nâng cấp version (Hibernate ddl-auto + SQL scripts).
 NFR-16: Script backup/restore đi kèm (DB + file storage).
-NFR-17: BHXH/BHYT/BHTN và thuế TNCN cấu hình per-tenant — không hard-code công thức.
+NFR-17: BHXH/BHYT/BHTN và thuế TNCN cấu hình được — không hard-code công thức.
 NFR-18: Hợp đồng lao động tuân thủ 3 loại theo Bộ luật Lao động 2019.
 NFR-19: OT tính theo đúng hệ số: 1.5x (ngày thường), 2.0x (cuối tuần), 3.0x (ngày lễ).
 NFR-20: Audit log immutable — không có API update/delete cho audit records.
@@ -96,40 +91,38 @@ NFR-20: Audit log immutable — không có API update/delete cho audit records.
 - ARCH-7: SLF4J + Logback logging. Dev: console DEBUG. Prod: JSON stdout INFO. Request/response filter logs method+URL+status+duration.
 
 **Data Architecture:**
-- ARCH-8: Abstract BaseEntity class — id (Long, AUTO_INCREMENT), tenantId (String, immutable after creation), active (Boolean, default true), createdAt, updatedAt (LocalDateTime, @CreatedDate/@LastModifiedDate), createdBy, updatedBy (Long, @CreatedBy/@LastModifiedBy).
-- ARCH-9: Tenant isolation via explicit tenantId parameter in ALL repository methods. Service layer passes TenantContext.getTenantId(). NOT Hibernate @Filter.
+- ARCH-8: Abstract BaseEntity class — id (Long, AUTO_INCREMENT), active (Boolean, default true), createdAt, updatedAt (LocalDateTime, @CreatedDate/@LastModifiedDate), createdBy, updatedBy (Long, @CreatedBy/@LastModifiedBy).
 - ARCH-10: Soft delete via Hibernate @Where(clause = "active = true") on BaseEntity. No hard delete exposed via API.
 - ARCH-11: AES-256-GCM JPA @Convert(converter = AesEncryptConverter.class) on CCCD field. Key from env ENCRYPTION_KEY. Encrypted → Base64 VARCHAR.
-- ARCH-12: Caffeine in-memory cache — tenant config 1hr, dashboard aggregates 5min, leave balances per-request. No Redis V1.
+- ARCH-12: Caffeine in-memory cache — system config 1hr, dashboard aggregates 5min, leave balances per-request. No Redis V1.
 - ARCH-13: Hibernate ddl-auto=update (dev), validate (prod). Versioned SQL scripts in db/migration/. Seed data in data.sql.
 
 **Authentication & Security:**
-- ARCH-14: jjwt library — access token HMAC-SHA256, 30min. Payload: sub(userId), tenantId, role, iat, exp.
-- ARCH-15: Refresh token: UUID in refresh_tokens table (token, user_id, tenant_id, expires_at, revoked). 7-day TTL. Rotation on refresh.
-- ARCH-16: JwtAuthenticationFilter (OncePerRequestFilter) → validates JWT → creates TenantUserDetails (userId, tenantId, role, departmentId) → SecurityContextHolder.
-- ARCH-17: TenantContext (ThreadLocal) populated by JwtAuthenticationFilter, cleared in finally. Service layer reads explicitly.
+- ARCH-14: jjwt library — access token HMAC-SHA256, 30min. Payload: sub(userId), role, iat, exp.
+- ARCH-15: Refresh token: UUID in refresh_tokens table (token, user_id, expires_at, revoked). 7-day TTL. Rotation on refresh.
+- ARCH-16: JwtAuthenticationFilter (OncePerRequestFilter) → validates JWT → creates CustomUserDetails (userId, role, departmentId) → SecurityContextHolder.
 - ARCH-18: @PreAuthorize("hasRole('ADMIN')") + custom annotations for department-scoped access.
 - ARCH-19: BCryptPasswordEncoder strength 12. Default password random, sent via email, force-change on first login.
 - ARCH-20: CORS: dev allow localhost:4200, prod allow configured domain(s). Methods: GET/POST/PUT/DELETE/PATCH.
 
 **API & Communication:**
-- ARCH-21: REST API base path /api/v1/. Plural nouns, kebab-case. Tenant implicit from JWT.
+- ARCH-21: REST API base path /api/v1/. Plural nouns, kebab-case.
 - ARCH-22: Unified ApiResponse<T> { int code, String message, T data }. Handled by @ControllerAdvice GlobalExceptionHandler.
 - ARCH-23: Paginated: data contains PageData<T> { content, page, size, totalElements, totalPages }. Default 20, max 100.
 - ARCH-24: springdoc-openapi + Swagger UI at /swagger-ui.html. JWT auth in OpenAPI security scheme.
 - ARCH-25: Application events: {Entity}{Action}Event via ApplicationEventPublisher. @EventListener in NotificationService, AuditLogService. @Async for email.
-- ARCH-26: Custom exceptions: BusinessException(code, message), ResourceNotFoundException, TenantAccessDeniedException → GlobalExceptionHandler → ApiResponse.
+- ARCH-26: Custom exceptions: BusinessException(code, message), ResourceNotFoundException → GlobalExceptionHandler → ApiResponse.
 
 **Frontend Architecture:**
 - ARCH-27: Feature module structure: features/{module}/components/ services/ models/ {module}.routes.ts. Standalone components (explicit `standalone: true`), lazy-loaded.
-- ARCH-28: AuthService (Angular Service + Signals) — stores user, tokens, tenant via signal(). Persisted localStorage.
+- ARCH-28: AuthService (Angular Service + Signals) — stores user, tokens via signal(). Persisted localStorage.
 - ARCH-29: JwtInterceptor (HttpInterceptor) — attaches Bearer header. On 401 → refresh → if fail → redirect /login via Router.
 - ARCH-30: RoleGuard (CanActivate) checks role from AuthService. Unauthorized → redirect dashboard/403.
 - ARCH-31: Angular HttpClient for all API calls. Services return Observable<ApiResponse<T>>. Components consume via async pipe or toSignal(). Manual cache invalidation via service refresh() methods.
 - ARCH-32: NG-ZORRO Form + Angular Reactive Forms exclusively for all forms. Reactive Forms provides validation, dynamic fields. NG-ZORRO provides Vietnamese locale and form layout.
 
 **Module Boundaries:**
-- ARCH-33: Allowed: common ← all, leave → workflow, payroll → attendance+leave+tenant, dashboard → read-only, report → read-only, notification ← event-only, dataimport → user.
+- ARCH-33: Allowed: common ← all, leave → workflow, payroll → attendance+leave+config, dashboard → read-only, report → read-only, notification ← event-only, dataimport → user.
 - ARCH-34: Forbidden: no cross-module entity/repository imports (use service interfaces). dashboard/report never write. common never imports business modules.
 
 **Scheduled Tasks:**
@@ -184,9 +177,6 @@ UX-DR34: Accessibility Floor — WCAG 2.1 AA baseline (NG-ZORRO handles). Tab or
 FR-1: Epic 1 — Đăng nhập username/password, JWT
 FR-2: Epic 1 — Phân quyền RBAC 4 vai trò
 FR-3: Epic 1 — Quản lý tài khoản (tạo/vô hiệu hóa/reset)
-FR-4: Epic 1 — Tenant Management (System Admin)
-FR-5: Epic 1 — Tenant Data Isolation (tenant_id)
-FR-6: Epic 1 — Tenant Configuration per-company
 FR-7: Epic 2 — CRUD Nhân viên
 FR-8: Epic 2 — Quản lý Phòng ban & Chức vụ
 FR-9: Epic 2 — Tìm kiếm & Lọc nhân viên
@@ -225,13 +215,13 @@ FR-41: Epic 9 — Báo cáo bảng lương tháng
 
 ## Epic List
 
-### Epic 1: Foundation — Authentication, Multi-tenant & Core Infrastructure
+### Epic 1: Foundation — Authentication & Core Infrastructure
 
-System Admin tạo được tenant mới. User đăng nhập bằng username/password, nhận JWT, phân quyền đúng vai trò. Data cách ly hoàn toàn giữa các tenant. Frontend có design system premium (sidebar, layout, page header, theme tokens) và auth flow hoàn chỉnh.
+User đăng nhập bằng username/password, nhận JWT, phân quyền đúng vai trò (Admin, Manager, Employee). Frontend có design system premium (sidebar, layout, page header, theme tokens) và auth flow hoàn chỉnh.
 
-**FRs covered:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-6
-**NFRs addressed:** NFR-1→7 (security), NFR-11 (indexes), NFR-12→16 (deployment)
-**ARCH covered:** ARCH-1→40 (foundational architecture, scaffolding, BaseEntity, TenantContext, JWT, Spring Security, Docker Compose, monorepo, profiles, naming conventions, module boundaries)
+**FRs covered:** FR-1, FR-2, FR-3
+**NFRs addressed:** NFR-1→5 (security), NFR-12→16 (deployment)
+**ARCH covered:** ARCH-1→40 (foundational architecture, scaffolding, BaseEntity, JWT, Spring Security, Docker Compose, monorepo, profiles, naming conventions, module boundaries)
 **UX-DRs covered:** UX-DR1 (ConfigProvider theme), UX-DR2 (sidebar), UX-DR3 (topbar), UX-DR4 (page header), UX-DR5 (card component), UX-DR24 (input/button system), UX-DR25 (brand mark), UX-DR28→34 (responsive, microcopy, states, interactions, elevation, navigation, accessibility)
 
 ### Epic 2: Employee Lifecycle Management
@@ -253,7 +243,7 @@ Employee check-in/out hàng ngày từ mạng công ty (IP whitelist). Hệ th�
 
 ### Epic 4: Dynamic Approval Workflow Engine
 
-Admin cấu hình chuỗi duyệt per-tenant, per-module qua Step Builder UI. Hệ thống có workflow mặc định (Employee → Manager → HR Admin) hoạt động ngay. Engine generic, V1 cho Leave, mở rộng V2.
+Admin cấu hình chuỗi duyệt per-module, per-module qua Step Builder UI. Hệ thống có workflow mặc định (Employee → Manager → HR Admin) hoạt động ngay. Engine generic, V1 cho Leave, mở rộng V2.
 
 **FRs covered:** FR-35, FR-36, FR-37
 **UX-DRs covered:** UX-DR18 (step builder 3-section), UX-DR19 (step timeline), UX-DR20 (preview pipeline)
@@ -270,7 +260,7 @@ Employee gửi đơn nghỉ phép (5 loại), xem pipeline duyệt real-time. Ma
 
 ### Epic 6: Payroll
 
-Admin cấu hình BHXH/BHYT/BHTN rates, biểu thuế TNCN 7 bậc, phụ cấp linh hoạt, OT. Tạo bảng lương tháng auto tính gross→net cho toàn bộ tenant. NV xem phiếu lương chi tiết. Xuất Excel.
+Admin cấu hình BHXH/BHYT/BHTN rates, biểu thuế TNCN 7 bậc, phụ cấp linh hoạt, OT. Tạo bảng lương tháng auto tính gross→net cho toàn bộ. NV xem phiếu lương chi tiết. Xuất Excel.
 
 **FRs covered:** FR-19, FR-20, FR-21, FR-22, FR-23, FR-24
 **NFRs addressed:** NFR-9 (payroll <30s), NFR-10 (Excel <10s), NFR-17 (rates configurable), NFR-19 (OT coefficients)
@@ -304,9 +294,9 @@ Admin/Manager mở Dashboard thấy ngay KPI: tổng NV, HĐ hết hạn, đơn 
 
 ---
 
-## Epic 1: Foundation — Authentication, Multi-tenant & Core Infrastructure
+## Epic 1: Foundation — Authentication & Core Infrastructure
 
-System Admin tạo được tenant mới. User đăng nhập bằng username/password, nhận JWT, phân quyền đúng vai trò. Data cách ly hoàn toàn giữa các tenant. Frontend có design system premium và auth flow hoàn chỉnh.
+User đăng nhập bằng username/password, nhận JWT, phân quyền đúng vai trò (Admin, Manager, Employee). Frontend có design system premium và auth flow hoàn chỉnh.
 
 ### Story 1.1: Project Scaffolding & Docker Compose Setup
 
@@ -330,25 +320,19 @@ So that the team can start developing features on a consistent, reproducible env
 
 **Given** the backend package structure
 **When** I inspect `src/main/java/com/hrms/`
-**Then** packages exist: `common/entity/`, `common/dto/`, `common/security/`, `common/config/`, `common/exception/`, `common/util/`, `user/`, `tenant/`
+**Then** packages exist: `common/entity/`, `common/dto/`, `common/security/`, `common/config/`, `common/exception/`, `common/util/`, `user/`
 
-### Story 1.2: BaseEntity, TenantContext & Database Infrastructure
+### Story 1.2: BaseEntity & Database Infrastructure
 
 As a **Developer**,
-I want the foundational data layer with BaseEntity, TenantContext, soft delete, and encryption,
-So that all future entities automatically inherit multi-tenant isolation, audit fields, and soft delete.
+I want the foundational data layer with BaseEntity, soft delete, and encryption,
+So that all future entities automatically inherit audit fields and soft delete.
 
 **Acceptance Criteria:**
 
 **Given** a new entity extending BaseEntity
 **When** it is persisted
-**Then** it has: id (Long AUTO_INCREMENT), tenantId (String, immutable after creation), active (Boolean, default true), createdAt/updatedAt (LocalDateTime, auto-set), createdBy/updatedBy (Long, from SecurityContext)
-**And** tenantId is set from TenantContext and cannot be changed after initial creation
-
-**Given** a request processed by JwtAuthenticationFilter
-**When** the filter extracts tenantId from JWT
-**Then** TenantContext (ThreadLocal) is populated with tenantId
-**And** TenantContext is cleared in the filter's finally block to prevent ThreadLocal leak
+**Then** it has: id (Long AUTO_INCREMENT), active (Boolean, default true), createdAt/updatedAt (LocalDateTime, auto-set), createdBy/updatedBy (Long, from SecurityContext)
 
 **Given** an entity field annotated with `@Convert(converter = AesEncryptConverter.class)`
 **When** the entity is saved
@@ -364,10 +348,10 @@ So that all future entities automatically inherit multi-tenant isolation, audit 
 **Given** application startup in dev profile
 **When** Hibernate ddl-auto=update runs
 **Then** tables are created/updated automatically
-**And** seed data (default roles, system admin account) loads from `data.sql`
+**And** seed data (default roles, admin account) loads from `data.sql`
 
 **Given** the Caffeine cache configuration
-**When** tenant config is queried
+**When** system config is queried
 **Then** results are cached for 1 hour and evicted on config update
 
 ### Story 1.3: JWT Authentication — Login & Refresh Token
@@ -381,7 +365,7 @@ So that I can securely access the system with automatic session refresh.
 **Given** a registered user with valid credentials
 **When** I POST `/api/v1/auth/login` with `{ username, password }`
 **Then** I receive `ApiResponse<LoginResponse>` with code 200 containing: accessToken (JWT HMAC-SHA256, 30min TTL), refreshToken (UUID, 7 days)
-**And** JWT payload contains: sub (userId), tenantId, role, iat, exp
+**And** JWT payload contains: sub (userId), role, iat, exp
 **And** password is verified against bcrypt hash (cost factor 12)
 **And** response format is `{ "code": 200, "message": "Thành công", "data": { "accessToken": "...", "refreshToken": "..." } }`
 
@@ -408,11 +392,11 @@ So that I can securely access the system with automatic session refresh.
 **Then** it returns ApiResponse with appropriate code and Vietnamese message
 **And** stack traces are never exposed in the response
 
-### Story 1.4: RBAC Authorization & Tenant Data Isolation
+### Story 1.4: RBAC Authorization
 
-As a **System Administrator**,
-I want role-based access control with 4 roles and strict tenant data isolation,
-So that users only access data within their permission scope and tenant boundary.
+As an **Admin**,
+I want role-based access control with 3 roles,
+So that users only access data within their permission scope.
 
 **Acceptance Criteria:**
 
@@ -422,17 +406,7 @@ So that users only access data within their permission scope and tenant boundary
 
 **Given** a user with role MANAGER in Department A
 **When** they query employee list
-**Then** they only see employees in Department A within their tenant
-
-**Given** an ADMIN user in Tenant A
-**When** they query any business entity
-**Then** all repository methods include `AND tenant_id = ?` in the query
-**And** no result from Tenant B is ever returned
-
-**Given** a SYSTEM_ADMIN user
-**When** they access `/api/v1/admin/**` endpoints
-**Then** they can query across all tenants without tenant_id constraint
-**And** non-SYSTEM_ADMIN users receive 403 on these endpoints
+**Then** they only see employees in Department A in the system
 
 **Given** the CORS configuration in dev profile
 **When** the frontend at `http://localhost:4200` sends a request
@@ -443,37 +417,7 @@ So that users only access data within their permission scope and tenant boundary
 **Then** `@PreAuthorize` annotations enforce role checks on controller methods
 **And** public endpoints are only: `/api/v1/auth/login`, `/api/v1/auth/refresh`
 
-### Story 1.5: Tenant Management & Configuration
-
-As a **System Admin**,
-I want to create and manage tenants with their configurations,
-So that each company has an isolated workspace with customizable settings.
-
-**Acceptance Criteria:**
-
-**Given** a System Admin
-**When** they POST to create a Tenant with company name, admin email
-**Then** a Tenant is created with unique tenant_id
-**And** an Admin user account is auto-created with random password
-**And** email is sent to the admin with login credentials
-**And** default tenant config is initialized (working hours 8:00-17:00, late threshold 15min, standard work days 22)
-
-**Given** a System Admin
-**When** they GET `/api/v1/admin/tenants`
-**Then** they see all tenants: company name, status (active/disabled), employee count, created date
-**And** results support pagination (default 20, max 100)
-
-**Given** a System Admin
-**When** they disable a Tenant
-**Then** all users of that tenant cannot log in (their tokens are invalidated)
-**And** all data remains intact
-
-**Given** a Tenant Admin
-**When** they GET/PUT their tenant configuration
-**Then** they can view and update: company info, working hours, late/early threshold, standard work days
-**And** changes apply only to their tenant, cached config is evicted
-
-### Story 1.6: User Account Management
+### Story 1.5: User Account Management
 
 As an **HR Admin**,
 I want to create, disable, and reset passwords for user accounts,
@@ -481,9 +425,9 @@ So that I can manage system access for employees in my company.
 
 **Acceptance Criteria:**
 
-**Given** an Admin in Tenant A
+**Given** an Admin
 **When** they create a new user account with email and role
-**Then** the account is created linked to Tenant A with a random password
+**Then** the account is created with a random password
 **And** email is sent with login credentials
 **And** the user must change password on first login (force-change flag)
 
@@ -498,11 +442,7 @@ So that I can manage system access for employees in my company.
 **Then** a new random password is generated and emailed
 **And** the user must change password on next login
 
-**Given** an Admin from Tenant B
-**When** they try to manage a user from Tenant A
-**Then** the request is denied with code 403
-
-### Story 1.7: Frontend Design System & Application Shell
+### Story 1.6: Frontend Design System & Application Shell
 
 As a **User**,
 I want a premium, professional-looking interface with consistent design,
@@ -544,7 +484,7 @@ So that the application feels like a high-quality commercial SaaS product.
 **And** 403 shows "Bạn không có quyền truy cập" + "Về Dashboard"
 **And** 404 shows "Trang không tồn tại" + "Về Dashboard"
 
-### Story 1.8: Frontend Auth Flow & Route Protection
+### Story 1.7: Frontend Auth Flow & Route Protection
 
 As a **User**,
 I want to log in, have my session managed automatically, and be redirected based on my role,
@@ -598,7 +538,7 @@ So that I can organize the company structure before adding employees.
 
 **Given** an Admin
 **When** they POST to create a Department with name
-**Then** the Department is created within their tenant
+**Then** the Department is created in the system
 **And** they can assign a Manager to the department
 
 **Given** an Admin
@@ -607,7 +547,7 @@ So that I can organize the company structure before adding employees.
 
 **Given** an Admin
 **When** they CRUD Positions (Chức vụ)
-**Then** positions are created/updated/soft-deleted within the tenant
+**Then** positions are created/updated/soft-deleted in the system
 **And** positions can be assigned to employees
 
 **Given** the frontend
@@ -631,7 +571,7 @@ So that I can maintain accurate personnel records for my company.
 
 **Given** valid employee data is submitted
 **When** the employee is created
-**Then** mã nhân viên is auto-generated (unique within tenant)
+**Then** mã nhân viên is auto-generated (unique in the system)
 **And** CCCD field is encrypted with AES-256-GCM in database
 **And** a user account is auto-created and credentials sent via email (FR-3)
 **And** toast: "Thêm nhân viên thành công"
@@ -639,7 +579,7 @@ So that I can maintain accurate personnel records for my company.
 **Given** an Admin
 **When** they edit an existing employee via Drawer
 **Then** all fields are pre-populated and editable (except mã NV)
-**And** tenantId cannot be changed
+**And** userId cannot be changed
 
 **Given** an Admin
 **When** they deactivate an employee
@@ -769,7 +709,7 @@ So that all personnel documents (CCCD, certificates, CV) are centralized.
 
 **Given** a file is uploaded
 **When** saved
-**Then** it is stored at `uploads/{tenant_id}/{employee_id}/{filename}` (outside webroot)
+**Then** it is stored at `uploads/{user_id}/{employee_id}/{filename}` (outside webroot)
 **And** duplicate filename → auto-renamed (append timestamp)
 **And** document record created: file name, type, size, upload date, uploader
 
@@ -782,9 +722,9 @@ So that all personnel documents (CCCD, certificates, CV) are centralized.
 **When** they view their own documents tab
 **Then** they can view and download their documents but cannot delete
 
-**Given** a user from another tenant
-**When** they try to download a document
-**Then** access is denied (tenant + role check on download endpoint)
+**Given** a user without permission
+**When** they try to download another employee's document
+**Then** access is denied (role-based check on download endpoint)
 
 ### Story 2.8: Employee Import from Excel
 
@@ -833,14 +773,13 @@ So that only employees within the company network can record attendance.
 
 **Given** an Admin
 **When** they navigate to Cấu hình → IP Whitelist
-**Then** they see a list of whitelisted IPs for their tenant with add/delete actions
+**Then** they see a list of whitelisted IPs for the system with add/delete actions
 
 **Given** an Admin
 **When** they add or remove an IP address
 **Then** the change takes effect immediately
-**And** each tenant has its own separate whitelist
 
-**Given** a tenant with an empty whitelist
+**Given** an empty whitelist
 **When** any employee attempts to check-in
 **Then** check-in is rejected (fail-safe: no whitelist = no check-in allowed)
 
@@ -859,7 +798,7 @@ So that my attendance is recorded automatically.
 
 **Given** an Employee on their Dashboard
 **When** they click "Check-in"
-**Then** the system validates their current IP against the tenant's whitelist
+**Then** the system validates their current IP against the system's whitelist
 **And** if IP is valid: records check-in timestamp, shows `message.success("Check-in 8:05 — Đúng giờ")`
 **And** the button changes to "Check-out"
 
@@ -882,7 +821,7 @@ So that my attendance is recorded automatically.
 
 **Given** an Admin
 **When** they need to correct an employee's attendance (forgot check-in/out)
-**Then** Admin can manually add/edit attendance records for any employee in their tenant
+**Then** Admin can manually add/edit attendance records for any employee in the system
 **And** the correction is recorded (auditable)
 
 ### Story 3.3: Late Arrival & Early Departure Rules
@@ -893,25 +832,21 @@ So that attendance compliance is tracked without manual review.
 
 **Acceptance Criteria:**
 
-**Given** tenant working hours configured as 8:00-17:00 with 15-minute threshold
+**Given** system working hours configured as 8:00-17:00 with 15-minute threshold
 **When** an Employee checks in at 8:16
 **Then** the record is flagged as "Đi muộn"
 
-**Given** the same tenant config
+**Given** the same system config
 **When** an Employee checks in at 8:14
 **Then** the record is normal (within 15-minute grace period)
 
-**Given** the same tenant config
+**Given** the same system config
 **When** an Employee checks out at 16:44
 **Then** the record is flagged as "Về sớm"
 
-**Given** the same tenant config
+**Given** the same system config
 **When** an Employee checks out at 16:46
 **Then** the record is normal
-
-**Given** Tenant A with hours 8:00-17:00 and Tenant B with hours 9:00-18:00
-**When** employees check in at the same time
-**Then** late/early rules are applied per each tenant's own configuration
 
 ### Story 3.4: Monthly Timesheet Summary
 
@@ -924,7 +859,7 @@ So that I can review work days, absences, and patterns before payroll.
 **Given** an Admin navigates to Chấm công
 **When** they select a month
 **Then** they see a summary table: each employee row with columns: Tổng ngày công, Đi muộn (count), Về sớm (count), Nghỉ phép (count), Vắng (count)
-**And** data is scoped to their tenant
+**And** data is scoped to the Admin's access
 
 **Given** a Manager
 **When** they view the attendance page
@@ -948,7 +883,7 @@ So that I can review work days, absences, and patterns before payroll.
 
 ## Epic 4: Dynamic Approval Workflow Engine
 
-Admin cấu hình chuỗi duyệt per-tenant, per-module qua Step Builder UI. Hệ thống có workflow mặc định (Employee → Manager → HR Admin) hoạt động ngay. Engine generic, V1 cho Leave, mở rộng V2.
+Admin cấu hình chuỗi duyệt per-module, per-module qua Step Builder UI. Hệ thống có workflow mặc định (Employee → Manager → HR Admin) hoạt động ngay. Engine generic, V1 cho Leave, mở rộng V2.
 
 ### Story 4.1: Workflow Template CRUD — Backend
 
@@ -960,7 +895,7 @@ So that my company has customized approval chains that match our organizational 
 
 **Given** an Admin
 **When** they POST to create a workflow template with: name, module (e.g., "LEAVE"), list of steps (each with order, approver type, approver role/user)
-**Then** the template is saved per-tenant, per-module
+**Then** the template is saved per-module, per-module
 **And** each step has: stepOrder, approverType (DIRECT_MANAGER, DEPARTMENT_MANAGER, ROLE, SPECIFIC_USER), approverRole or approverUserId
 
 **Given** an Admin
@@ -968,9 +903,9 @@ So that my company has customized approval chains that match our organizational 
 **Then** changes only apply to NEW requests created after the save
 **And** requests already in pipeline keep the old workflow version
 
-**Given** a module within a tenant
+**Given** a module
 **When** checked
-**Then** only one workflow template is active at a time per module per tenant
+**Then** only one workflow template is active at a time per module
 
 **Given** an Admin
 **When** they delete a custom workflow
@@ -980,11 +915,11 @@ So that my company has customized approval chains that match our organizational 
 
 As a **System**,
 I want default approval workflows that work without configuration,
-So that new tenants can use the system immediately.
+So that the system works immediately without custom configuration.
 
 **Acceptance Criteria:**
 
-**Given** a newly created tenant
+**Given** a fresh system installation
 **When** no custom workflow is configured for module "LEAVE"
 **Then** the default workflow applies: Step 1 = Employee (fixed) → Step 2 = Manager → Step 3 = HR Admin
 
@@ -1004,7 +939,7 @@ So that requests flow through the configured approval chain without manual routi
 
 **Acceptance Criteria:**
 
-**Given** an Employee submits a request (e.g., leave request) in a tenant with configured workflow
+**Given** an Employee submits a request (e.g., leave request) with a configured workflow
 **When** the request is created
 **Then** the system creates an ApprovalPipeline with N ApprovalPipelineSteps matching the active template
 **And** Step 1 (Employee/submitter) is auto-approved
@@ -1104,7 +1039,7 @@ So that I can request time off through the system instead of paper/email.
 
 **Given** a valid leave request is submitted
 **When** saved
-**Then** system looks up active workflow template for module "LEAVE" in tenant
+**Then** system looks up active workflow template for module "LEAVE" in the system
 **And** creates approval pipeline per Epic 4 engine
 **And** toast: "Đơn nghỉ phép đã gửi"
 **And** step 1 approver receives notification (event published)
@@ -1161,14 +1096,14 @@ So that leave entitlements are tracked accurately without manual calculation.
 
 **Given** a new year begins
 **When** LeaveBalanceResetJob runs (scheduled annually)
-**Then** all employees in all tenants receive default annual leave: 12 days (or tenant-configured amount)
-**And** previous year balances reset (unless carry-over is enabled for tenant)
+**Then** all employees in all employees receive default annual leave: 12 days (or system-configured amount)
+**And** previous year balances reset (unless carry-over is enabled in system config)
 
 **Given** an employee who joined mid-year
 **When** their leave balance is initialized
 **Then** annual leave is calculated pro-rata based on remaining months
 
-**Given** tenant config has seniority bonus enabled
+**Given** system config has seniority bonus enabled
 **When** an employee has 5+ years tenure
 **Then** they receive +1 day per 5 years of seniority
 
@@ -1201,14 +1136,14 @@ So that I can plan my time off and track my requests.
 
 **Given** an Admin/Manager views Leave management
 **When** they navigate to Nghỉ phép
-**Then** they see all leave requests in their scope (Admin: tenant, Manager: department)
+**Then** they see all leave requests in their scope (Admin: all, Manager: department)
 **And** leave calendar view showing who is off on which day (FR-34 partial)
 
 ---
 
 ## Epic 6: Payroll
 
-Admin cấu hình BHXH/BHYT/BHTN rates, biểu thuế TNCN 7 bậc, phụ cấp linh hoạt, OT. Tạo bảng lương tháng auto tính gross→net cho toàn bộ tenant. NV xem phiếu lương chi tiết. Xuất Excel.
+Admin cấu hình BHXH/BHYT/BHTN rates, biểu thuế TNCN 7 bậc, phụ cấp linh hoạt, OT. Tạo bảng lương tháng auto tính gross→net cho toàn bộ. NV xem phiếu lương chi tiết. Xuất Excel.
 
 ### Story 6.1: Payroll Configuration — Insurance & Tax
 
@@ -1220,7 +1155,7 @@ So that payroll calculations comply with current Vietnamese regulations.
 
 **Given** an Admin navigates to Cấu hình → Thông số lương
 **When** the page loads
-**Then** they see configurable fields per-tenant:
+**Then** they see configurable fields per-module:
 - BHXH: NLĐ 8%, DN 17.5% (defaults)
 - BHYT: NLĐ 1.5%, DN 3%
 - BHTN: NLĐ 1%, DN 1%
@@ -1232,7 +1167,7 @@ So that payroll calculations comply with current Vietnamese regulations.
 **Given** an Admin changes BHXH rate from 8% to 8.5%
 **When** saved
 **Then** changes apply to payroll generated from NEXT month onward
-**And** only affects this tenant
+**And** applies from next month onward
 
 **Given** the tax bracket table
 **When** displayed
@@ -1291,7 +1226,7 @@ So that OT compensation is calculated correctly in payroll.
 
 **Given** standard work days
 **When** used in calculation
-**Then** it uses tenant-configured value (default 22 days/month)
+**Then** it uses system-configured value (default 22 days/month)
 
 **Given** the OT management UI
 **When** displayed
@@ -1382,7 +1317,7 @@ So that I understand my salary breakdown without asking HR.
 **Then** Thu nhập chịu thuế = Gross - Giảm trừ bản thân - Giảm trừ NPT - BH bắt buộc
 **And** if Thu nhập chịu thuế ≤ 0, thuế = 0
 
-**Given** Employee from Tenant A
+**Given** an Employee
 **When** they view payslips
 **Then** they only see their own payslips, never other employees'
 
@@ -1402,13 +1337,13 @@ So that users are informed of important actions across all modules.
 
 **Given** a business event is published (LeaveRequestCreatedEvent, LeaveApprovedEvent, LeaveRejectedEvent, ContractExpiryEvent, PayrollConfirmedEvent, AccountCreatedEvent)
 **When** the @EventListener in NotificationService receives it
-**Then** a Notification record is created: recipientUserId, tenantId, title, content, resourceType, resourceId, read=false, createdAt
+**Then** a Notification record is created: recipientUserId, userId, title, content, resourceType, resourceId, read=false, createdAt
 
 **Given** a notification is created
 **When** the @Async email listener processes it
 **Then** an email is sent via SMTP to the recipient's email
 **And** email contains: subject, body with event details, link to resource
-**And** SMTP config is shared across all tenants (V1)
+**And** SMTP config is shared system-wide (V1)
 
 **Given** email sending fails
 **When** SMTP is unavailable
@@ -1421,7 +1356,7 @@ So that users are informed of important actions across all modules.
 - Leave request created → step 1 approver
 - Leave approved at step N → step N+1 approver (or requester if final)
 - Leave rejected → requester
-- Contract expiry (30 days) → tenant Admin(s)
+- Contract expiry (30 days) → Admin(s)
 - Payroll confirmed → each employee (payslip ready)
 - Account created → new user (credentials)
 
@@ -1466,7 +1401,7 @@ So that I can review my complete notification history.
 **When** the page loads
 **Then** it shows all notifications in a data table/list: icon, content, time, read/unread status
 **And** paginated (default 20)
-**And** scoped to current user's tenant
+**And** scoped to current user
 
 **Given** the notification list
 **When** displayed
@@ -1493,7 +1428,7 @@ So that every CREATE, UPDATE, DELETE operation has an immutable audit trail.
 
 **Given** any @Service method that performs a CREATE operation
 **When** the AuditLogAspect intercepts it
-**Then** an AuditLog record is created: userId, tenantId, timestamp, entityType, entityId, action=CREATE, newValue (JSON snapshot)
+**Then** an AuditLog record is created: userId, userId, timestamp, entityType, entityId, action=CREATE, newValue (JSON snapshot)
 **And** the record is immutable (no UPDATE/DELETE API for audit_logs)
 
 **Given** an UPDATE operation on any business entity
@@ -1523,7 +1458,7 @@ So that security events can be investigated.
 
 **Given** a successful login
 **When** JWT is issued
-**Then** a login history record is created: userId, tenantId, timestamp, IP address, userAgent, status=SUCCESS
+**Then** a login history record is created: userId, userId, timestamp, IP address, userAgent, status=SUCCESS
 
 **Given** a failed login (wrong password)
 **When** authentication fails
@@ -1562,8 +1497,7 @@ So that I can investigate data changes and security events.
 
 **Given** audit log data
 **When** queried
-**Then** only records within the Admin's tenant are returned
-**And** System Admin can view across all tenants
+**Then** all audit records are returned for the Admin
 
 ---
 

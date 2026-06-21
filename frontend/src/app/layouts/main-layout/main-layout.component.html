@@ -1,0 +1,95 @@
+<nz-layout class="app-layout">
+  <nz-sider
+    class="app-sidebar"
+    nzCollapsible
+    [(nzCollapsed)]="isCollapsed"
+    [nzWidth]="260"
+    [nzCollapsedWidth]="72"
+    nzBreakpoint="lg"
+  >
+    <div class="sidebar-logo">
+      <div class="logo-mark">H</div>
+      @if (!isCollapsed) {
+        <div class="logo-text">
+          <span class="logo-title">HRMS</span>
+          <span class="logo-subtitle">People Operations</span>
+        </div>
+      }
+    </div>
+
+    <ul nz-menu nzMode="inline" nzTheme="dark" class="sidebar-menu">
+      @for (item of menu.visibleMenu(); track item.label) {
+        @if (item.children && item.children.length > 0) {
+          <li nz-submenu [nzTitle]="item.label" [nzIcon]="item.icon">
+            <ul>
+              @for (child of item.children; track child.label) {
+                <li nz-menu-item [nzMatchRouter]="true">
+                  <a [routerLink]="child.route">
+                    <span nz-icon [nzType]="child.icon"></span>
+                    <span>{{ child.label }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </li>
+        } @else {
+          <li nz-menu-item [nzMatchRouter]="true">
+            <a [routerLink]="item.route">
+              <span nz-icon [nzType]="item.icon"></span>
+              <span>{{ item.label }}</span>
+            </a>
+          </li>
+        }
+      }
+    </ul>
+  </nz-sider>
+
+  <nz-layout class="app-content-layout">
+    <nz-header class="app-topbar">
+      <div class="topbar-left">
+        <span
+          class="trigger"
+          nz-icon
+          [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+          (click)="isCollapsed = !isCollapsed"
+        ></span>
+        <nz-breadcrumb class="topbar-breadcrumb">
+          <nz-breadcrumb-item>HRMS</nz-breadcrumb-item>
+        </nz-breadcrumb>
+      </div>
+
+      <div class="topbar-right">
+        <nz-badge [nzCount]="0" class="notification-badge">
+          <span nz-icon nzType="bell" nzTheme="outline" class="topbar-icon"></span>
+        </nz-badge>
+
+        <div nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click" class="user-dropdown">
+          <nz-avatar
+            [nzText]="auth.user()?.fullName?.charAt(0) || 'U'"
+            nzSize="small"
+            style="background-color: #1677ff"
+          ></nz-avatar>
+          @if (auth.user(); as user) {
+            <span class="user-name">{{ user.fullName }}</span>
+          }
+          <span nz-icon nzType="down" nzTheme="outline"></span>
+        </div>
+        <nz-dropdown-menu #userMenu>
+          <ul nz-menu>
+            <li nz-menu-item routerLink="/profile">
+              <span nz-icon nzType="user"></span> Ho so ca nhan
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="logout()">
+              <span nz-icon nzType="logout"></span> Dang xuat
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </nz-header>
+
+    <nz-content class="app-content">
+      <router-outlet />
+    </nz-content>
+  </nz-layout>
+</nz-layout>

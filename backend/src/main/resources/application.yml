@@ -3,39 +3,22 @@ spring:
     name: hrms-backend
   profiles:
     active: dev
-
   jpa:
-    open-in-view: false
-    properties:
-      hibernate:
-        format_sql: true
+    defer-datasource-initialization: true
 
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-expiration: 1800000    # 30 minutes
+    refresh-token-expiration: 604800000 # 7 days
+  encryption:
+    key: ${ENCRYPTION_KEY}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
 
 server:
   port: 8080
 
-# JWT Configuration
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-expiration: 1800000   # 30 minutes
-  refresh-token-expiration: 604800000 # 7 days
-
-# Encryption
-encryption:
-  key: ${ENCRYPTION_KEY}
-
-# File Upload
-file:
-  upload-dir: ${FILE_UPLOAD_DIR:./uploads}
-  allowed-types: application/pdf,image/jpeg,image/png,application/vnd.openxmlformats-officedocument.wordprocessingml.document
-  max-files-per-employee: 20
-
 springdoc:
-  api-docs:
-    path: /api-docs
   swagger-ui:
     path: /swagger-ui.html

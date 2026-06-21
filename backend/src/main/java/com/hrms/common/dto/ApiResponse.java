@@ -1,31 +1,31 @@
 package com.hrms.common.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-import java.time.LocalDateTime;
-
-@Data
-@NoArgsConstructor
+@Getter
 @AllArgsConstructor
-public class  ApiResponse<T> {
-    private T data;
-    private int code;
-    private LocalDateTime timestamp;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ApiResponse<T> {
 
-    public static <T> ApiResponse<T> success(int code ,T data){
-        ApiResponse<T> response = new ApiResponse<>();
-        response.setCode(code);
-        response.setData(data);
-        response.setTimestamp(LocalDateTime.now());
-        return response;
+    private int code;
+    private String message;
+    private T data;
+
+    public static <T> ApiResponse<T> success(T data) {
+        return new ApiResponse<>(200, "Thành công", data);
     }
-    public static <T> ApiResponse<T> error(int code,T data){
-        ApiResponse<T> response = new ApiResponse<>();
-        response.setCode(code);
-        response.setData(data);
-        response.setTimestamp(LocalDateTime.now());
-        return response;
+
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return new ApiResponse<>(200, message, data);
+    }
+
+    public static <T> ApiResponse<T> created(T data) {
+        return new ApiResponse<>(201, "Tạo thành công", data);
+    }
+
+    public static <T> ApiResponse<T> error(int code, String message) {
+        return new ApiResponse<>(code, message, null);
     }
 }

@@ -1,0 +1,124 @@
+# generated: 2026-06-19
+# last_updated: 2026-06-20
+# project: HRMS
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: {project-root}/_bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-06-19
+last_updated: 2026-06-21
+project: HRMS
+project_key: NOKEY
+tracking_system: file-system
+story_location: "{project-root}/_bmad-output/implementation-artifacts"
+
+development_status:
+  # Epic 1: Foundation — Authentication & Core Infrastructure
+  epic-1: in-progress
+  1-1-project-scaffolding-docker-compose-setup: done
+  1-2-baseentity-database-infrastructure: done
+  1-3-jwt-authentication-login-refresh-token: ready-for-dev
+  1-4-rbac-authorization: backlog
+  1-5-user-account-management: backlog
+  1-6-frontend-design-system-application-shell: backlog
+  1-7-frontend-auth-flow-route-protection: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: Employee Lifecycle Management
+  epic-2: backlog
+  2-1-department-position-management: backlog
+  2-2-employee-crud-create-edit: backlog
+  2-3-employee-list-search-filter-table-display: backlog
+  2-4-employee-detail-page-with-tabs: backlog
+  2-5-labor-contract-management: backlog
+  2-6-contract-expiry-alerts: backlog
+  2-7-employee-document-management: backlog
+  2-8-employee-import-from-excel: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: Attendance Management
+  epic-3: backlog
+  3-1-ip-whitelist-configuration: backlog
+  3-2-employee-check-in-check-out: backlog
+  3-3-late-arrival-early-departure-rules: backlog
+  3-4-monthly-timesheet-summary: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: Dynamic Approval Workflow
+  epic-4: backlog
+  4-1-workflow-template-crud-backend: backlog
+  4-2-default-workflow-fallback: backlog
+  4-3-approval-pipeline-execution-engine: backlog
+  4-4-step-builder-ui-workflow-configuration: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Leave Management
+  epic-5: backlog
+  5-1-leave-request-submission: backlog
+  5-2-approval-inbox-review-decide: backlog
+  5-3-leave-balance-management: backlog
+  5-4-employee-leave-history-calendar: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: Payroll
+  epic-6: backlog
+  6-1-payroll-configuration-insurance-tax: backlog
+  6-2-allowance-configuration-assignment: backlog
+  6-3-overtime-recording: backlog
+  6-4-monthly-payroll-generation: backlog
+  6-5-payroll-confirmation-excel-export: backlog
+  6-6-employee-payslip-view: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: Notifications
+  epic-7: backlog
+  7-1-notification-infrastructure-event-listeners: backlog
+  7-2-in-app-notification-ui-dropdown-badge: backlog
+  7-3-full-notification-page: backlog
+  epic-7-retrospective: optional
+
+  # Epic 8: Audit Log
+  epic-8: backlog
+  8-1-automatic-audit-logging-via-aop: backlog
+  8-2-login-history-recording: backlog
+  8-3-audit-log-viewer-login-history-ui: backlog
+  epic-8-retrospective: optional
+
+  # Epic 9: Dashboard & Reports
+  epic-9: backlog
+  9-1-hr-dashboard-kpi-stats-quick-actions: backlog
+  9-2-contract-deadlines-activity-timeline: backlog
+  9-3-payroll-dashboard-card: backlog
+  9-4-leave-dashboard: backlog
+  9-5-employee-report-with-export: backlog
+  9-6-attendance-payroll-reports-with-export: backlog
+  epic-9-retrospective: optional

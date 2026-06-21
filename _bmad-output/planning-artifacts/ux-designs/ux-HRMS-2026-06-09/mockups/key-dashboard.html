@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HRMS — Premium Dashboard</title>
+  <title>HRMS — Dashboard</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -22,16 +22,16 @@
       --orange-soft: #fff7ed;
       --sidebar: #0f172a;
       --sidebar-muted: #94a3b8;
-      --bg: #f6f8fb;
+      --bg: #fafafa;
       --surface: #ffffff;
-      --text: #111827;
-      --muted: #667085;
-      --faint: #98a2b3;
-      --line: #eef2f7;
-      --shadow: 0 18px 50px rgba(15, 23, 42, .06), 0 3px 10px rgba(15, 23, 42, .04);
-      --shadow-hover: 0 24px 70px rgba(15, 23, 42, .10), 0 8px 18px rgba(15, 23, 42, .06);
-      --radius: 20px;
-      --radius-sm: 12px;
+      --text: #1e293b;
+      --muted: #64748b;
+      --faint: #94a3b8;
+      --line: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+      --radius: 12px;
+      --radius-sm: 10px;
     }
 
     body {
@@ -45,7 +45,7 @@
 
     .sidebar {
       width: 260px;
-      background: radial-gradient(circle at 20% 0%, rgba(22,119,255,.20), transparent 28%), var(--sidebar);
+      background: radial-gradient(circle at 20% 0%, rgba(22,119,255,.15), transparent 28%), var(--sidebar);
       color: white;
       position: fixed;
       inset: 0 auto 0 0;
@@ -57,27 +57,27 @@
 
     .brand { display: flex; align-items: center; gap: 12px; padding: 4px 8px 24px; }
     .brand-mark {
-      width: 40px; height: 40px; border-radius: 14px;
+      width: 40px; height: 40px; border-radius: 12px;
       display: grid; place-items: center;
-      font-weight: 800;
+      font-weight: 700;
       background: linear-gradient(135deg, #1677ff, #69b1ff);
-      box-shadow: 0 14px 30px rgba(22,119,255,.30);
+      box-shadow: 0 4px 12px rgba(22,119,255,.16);
     }
-    .brand-title { font-size: 18px; font-weight: 750; letter-spacing: -.03em; }
+    .brand-title { font-size: 18px; font-weight: 700; letter-spacing: -.03em; }
     .brand-sub { color: var(--sidebar-muted); font-size: 12px; margin-top: 1px; }
 
     .nav { flex: 1; overflow: auto; padding-right: 2px; }
-    .nav-group { margin: 18px 8px 8px; color: rgba(148,163,184,.70); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 700; }
+    .nav-group { margin: 18px 8px 8px; color: rgba(148,163,184,.70); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
     .nav-item {
-      height: 42px;
+      height: 40px;
       display: flex; align-items: center; gap: 12px;
-      border-radius: 13px;
+      border-radius: 10px;
       color: #cbd5e1;
       padding: 0 12px;
       margin: 3px 0;
       position: relative;
       cursor: pointer;
-      transition: .2s ease;
+      transition: all 150ms ease;
       font-size: 14px;
       font-weight: 500;
     }
@@ -88,7 +88,7 @@
       background: #1677ff; border-radius: 999px;
     }
     .nav-icon { width: 19px; height: 19px; stroke: currentColor; opacity: .9; }
-    .nav-badge { margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; display:grid; place-items:center; border-radius: 999px; background: #ef4444; color: white; font-size: 12px; font-weight: 700; }
+    .nav-badge { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; display:grid; place-items:center; border-radius: 999px; background: #ef4444; color: white; font-size: 11px; font-weight: 600; }
 
     .profile {
       margin-top: 18px;
@@ -100,42 +100,41 @@
       width: 42px; height: 42px; border-radius: 999px; flex: none;
       background: linear-gradient(135deg,#dbeafe,#fce7f3);
       display: grid; place-items: center; overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.6);
     }
     .avatar-img svg { width: 42px; height: 42px; }
-    .profile-name { font-weight: 700; font-size: 14px; }
+    .profile-name { font-weight: 600; font-size: 14px; }
     .profile-role { color: var(--sidebar-muted); font-size: 12px; }
 
     .main { margin-left: 260px; width: calc(100% - 260px); padding: 28px 36px 44px; }
 
     .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom: 28px; }
-    .breadcrumb { font-size: 13px; color: var(--faint); font-weight: 600; margin-bottom: 8px; }
-    h1 { font-size: 32px; line-height: 1.15; letter-spacing: -.04em; font-weight: 800; margin-bottom: 8px; }
+    .breadcrumb { font-size: 13px; color: var(--faint); font-weight: 500; margin-bottom: 8px; }
+    h1 { font-size: 28px; line-height: 1.2; letter-spacing: -.03em; font-weight: 700; margin-bottom: 8px; }
     .subtitle { color: var(--muted); font-size: 15px; }
 
     .utilities { display:flex; align-items:center; gap: 14px; }
     .search {
       width: 320px; height: 44px; border: 1px solid var(--line); background: white; border-radius: 999px;
       display:flex; align-items:center; gap:10px; padding: 0 16px; color: var(--faint);
-      box-shadow: 0 10px 30px rgba(15,23,42,.04);
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
     }
-    .u-icon { width: 40px; height: 40px; border-radius: 999px; display:grid; place-items:center; color: #64748b; cursor:pointer; position:relative; transition:.2s; }
-    .u-icon:hover { background: white; color: var(--primary); box-shadow: 0 10px 30px rgba(15,23,42,.06); }
+    .u-icon { width: 38px; height: 38px; border-radius: 999px; display:grid; place-items:center; color: #64748b; cursor:pointer; position:relative; transition: 150ms ease; }
+    .u-icon:hover { background: white; color: var(--primary); box-shadow: var(--shadow-hover); }
     .dot { position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%; background:#ef4444; border:2px solid var(--bg); }
 
     .quick { display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
     .quick-card {
-      background: rgba(255,255,255,.76); backdrop-filter: blur(10px);
-      border: 1px solid rgba(238,242,247,.9);
-      border-radius: 18px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 12px;
       padding: 16px;
       display:flex; align-items:center; gap:12px;
       cursor:pointer;
-      transition:.2s ease;
+      transition: all 150ms ease;
     }
-    .quick-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-    .quick-icon { width: 38px; height: 38px; border-radius: 13px; display:grid; place-items:center; background: var(--primary-soft); color: var(--primary); }
-    .quick-title { font-weight: 700; font-size: 14px; }
+    .quick-card:hover { border-color: #94a3b8; box-shadow: var(--shadow-hover); }
+    .quick-icon { width: 36px; height: 36px; border-radius: 10px; display:grid; place-items:center; background: var(--primary-soft); color: var(--primary); }
+    .quick-title { font-weight: 600; font-size: 14px; }
     .quick-desc { color: var(--faint); font-size: 12px; }
 
     .kpis { display:grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 22px; }
@@ -144,49 +143,48 @@
       border-radius: var(--radius);
       padding: 22px;
       box-shadow: var(--shadow);
-      transition: .22s ease;
-      overflow: hidden;
-      position: relative;
+      border: 1px solid var(--line);
+      transition: box-shadow 150ms ease, border-color 150ms ease;
     }
-    .kpi::after { content:""; position:absolute; right:-30px; top:-50px; width:120px; height:120px; border-radius:999px; background: linear-gradient(135deg, rgba(22,119,255,.10), transparent); }
-    .kpi:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+    .kpi:hover { border-color: #cbd5e1; box-shadow: var(--shadow-hover); }
     .kpi-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; }
-    .kpi-icon { width: 48px; height: 48px; border-radius: 16px; display:grid; place-items:center; }
-    .kpi-icon.blue { color:#1677ff; background: rgba(22,119,255,.12); }
-    .kpi-icon.green { color:#10b981; background: rgba(16,185,129,.12); }
-    .kpi-icon.orange { color:#f59e0b; background: rgba(245,158,11,.13); }
-    .kpi-icon.red { color:#ef4444; background: rgba(239,68,68,.12); }
-    .spark { width: 74px; height: 28px; opacity: .65; }
-    .kpi-label { color: var(--muted); font-size: 13px; font-weight: 600; }
-    .kpi-value { font-size: 36px; line-height: 1; letter-spacing: -.05em; font-weight: 800; margin: 9px 0 16px; }
-    .trend { font-size: 13px; color: var(--faint); }
-    .trend b.up { color: var(--success); font-weight: 750; }
-    .trend b.down { color: var(--danger); font-weight: 750; }
+    .kpi-icon { width: 44px; height: 44px; border-radius: 10px; display:grid; place-items:center; }
+    .kpi-icon.blue { color:#1677ff; background: rgba(22,119,255,.10); }
+    .kpi-icon.green { color:#10b981; background: rgba(16,185,129,.10); }
+    .kpi-icon.orange { color:#f59e0b; background: rgba(245,158,11,.10); }
+    .kpi-icon.red { color:#ef4444; background: rgba(239,68,68,.10); }
+    .spark { width: 74px; height: 28px; opacity: .5; }
+    .kpi-label { color: var(--muted); font-size: 13px; font-weight: 500; }
+    .kpi-value { font-size: 32px; line-height: 1; letter-spacing: -.04em; font-weight: 700; margin: 9px 0 16px; }
+    .trend { font-size: 13px; color: var(--faint); font-weight: 500; }
+    .trend b.up { color: var(--success); font-weight: 600; }
+    .trend b.down { color: var(--danger); font-weight: 600; }
 
     .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 22px; }
     .panel {
       background: var(--surface);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
+      border: 1px solid var(--line);
       overflow: hidden;
     }
-    .panel-head { display:flex; align-items:center; justify-content:space-between; padding: 22px 24px; }
-    .panel-title { display:flex; align-items:center; gap:9px; font-size: 18px; font-weight: 800; letter-spacing: -.02em; }
-    .count { font-size: 12px; padding: 3px 9px; border-radius:999px; font-weight:800; }
+    .panel-head { display:flex; align-items:center; justify-content:space-between; padding: 20px 22px; }
+    .panel-title { display:flex; align-items:center; gap:9px; font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+    .count { font-size: 12px; padding: 3px 9px; border-radius:999px; font-weight:600; }
     .count.warn { color: var(--warning); background: var(--warning-soft); }
     .count.red { color: var(--danger); background: var(--danger-soft); }
-    .panel-link { color: var(--primary); font-size: 13px; font-weight: 700; text-decoration:none; }
+    .panel-link { color: var(--primary); font-size: 13px; font-weight: 600; text-decoration:none; }
 
     table { width:100%; border-collapse: collapse; }
-    thead { background: #f8faff; }
-    th { text-align:left; padding: 12px 24px; color:#94a3b8; font-size: 12px; font-weight: 800; letter-spacing:.07em; text-transform:uppercase; }
-    td { padding: 15px 24px; border-top: 1px solid var(--line); vertical-align: middle; font-size: 14px; }
-    tr { transition: .18s; }
-    tbody tr:hover { background:#fbfdff; }
-    .name { font-weight: 700; color:#1f2937; }
+    thead { background: #fafafa; }
+    th { text-align:left; padding: 12px 20px; color:#94a3b8; font-size: 12px; font-weight: 600; letter-spacing:.06em; text-transform:uppercase; }
+    td { padding: 14px 20px; border-top: 1px solid var(--line); vertical-align: middle; font-size: 14px; }
+    tr { transition: background 150ms ease; }
+    tbody tr:hover { background:#f8fafc; }
+    .name { font-weight: 500; color: var(--text); }
     .muted { color: var(--muted); }
 
-    .badge { display:inline-flex; align-items:center; border-radius:999px; padding: 5px 10px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+    .badge { display:inline-flex; align-items:center; border-radius:999px; padding: 4px 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
     .badge.blue { background:#eff6ff; color:#1d4ed8; }
     .badge.green { background:#ecfdf5; color:#047857; }
     .badge.orange { background:#fff7ed; color:#c2410c; }
@@ -195,28 +193,28 @@
     .badge.gray { background:#f1f5f9; color:#475569; }
 
     .deadline { min-width: 110px; }
-    .deadline-top { display:flex; justify-content:space-between; align-items:center; gap: 8px; margin-bottom:7px; font-weight:800; font-size:13px; }
+    .deadline-top { display:flex; justify-content:space-between; align-items:center; gap: 8px; margin-bottom:7px; font-weight:600; font-size:13px; }
     .deadline.red .deadline-top { color: var(--danger); }
     .deadline.amber .deadline-top { color: var(--warning); }
     .deadline.green .deadline-top { color: var(--success); }
-    .bar { width:100%; height:5px; border-radius:999px; background:#eef2f7; overflow:hidden; }
+    .bar { width:100%; height:4px; border-radius:999px; background: var(--line); overflow:hidden; }
     .bar span { display:block; height:100%; border-radius:999px; }
     .deadline.red .bar span { background: var(--danger); width: 82%; }
     .deadline.amber .bar span { background: var(--warning); width: 48%; }
     .deadline.green .bar span { background: var(--success); width: 30%; }
 
     .person { display:flex; align-items:center; gap:10px; }
-    .mini-avatar { width:30px; height:30px; border-radius:999px; background: linear-gradient(135deg,#dbeafe,#e0f2fe); display:grid; place-items:center; color:#1d4ed8; font-weight:800; font-size:12px; }
+    .mini-avatar { width:30px; height:30px; border-radius:999px; background: linear-gradient(135deg,#3b82f6,#60a5fa); display:grid; place-items:center; color:white; font-weight:600; font-size:12px; }
 
     .bottom { display:grid; grid-template-columns: 1.2fr .8fr; gap:22px; }
-    .pay-card, .activity { background:white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+    .pay-card, .activity { background:white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--line); padding: 22px; }
     .pay-main { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-top: 18px; }
-    .money { font-size: 32px; font-weight: 850; letter-spacing:-.05em; margin-top:4px; }
+    .money { font-size: 28px; font-weight: 700; letter-spacing:-.04em; margin-top:4px; }
     .mini-chart { height:72px; width:180px; opacity:.85; }
     .activity-list { margin-top:18px; display:grid; gap:16px; }
     .activity-item { display:flex; gap:12px; align-items:flex-start; }
-    .activity-dot { width:10px; height:10px; border-radius:999px; background:var(--primary); margin-top:7px; box-shadow: 0 0 0 5px rgba(22,119,255,.10); }
-    .activity-text { font-weight:700; font-size:14px; }
+    .activity-dot { width:8px; height:8px; border-radius:999px; background:var(--primary); margin-top:7px; box-shadow: 0 0 0 4px rgba(22,119,255,.10); flex:none; }
+    .activity-text { font-weight:500; font-size:14px; }
     .activity-time { color:var(--faint); font-size:12px; margin-top:2px; }
 
     svg { width: 19px; height: 19px; }
@@ -236,7 +234,7 @@
     }
     @media (max-width: 640px) {
       .main { padding: 16px; }
-      h1 { font-size: 26px; }
+      h1 { font-size: 22px; }
       .kpis, .quick { grid-template-columns: 1fr; }
       .panel { overflow-x:auto; }
       table { min-width: 650px; }
@@ -299,10 +297,10 @@
       </section>
 
       <section class="kpis">
-        <div class="kpi"><div class="kpi-head"><div class="kpi-icon blue"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3ZM8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3Zm8 2c-2.2 0-6 1.1-6 3.3V18h12v-1.7c0-2.2-3.8-3.3-6-3.3ZM8 13c-2.2 0-6 1.1-6 3.3V18h6"/></svg></div><svg class="spark" viewBox="0 0 100 40"><path d="M5 30 C20 18, 30 25, 42 16 S67 12, 80 8 S92 14, 96 6" fill="none" stroke="#1677ff" stroke-width="4" stroke-linecap="round"/></svg></div><div class="kpi-label">Tổng nhân viên</div><div class="kpi-value">118</div><div class="trend">Đang hoạt động: <b>118 / 120</b></div></div>
-        <div class="kpi"><div class="kpi-head"><div class="kpi-icon green"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M12 5v14M5 12h14"/></svg></div><svg class="spark" viewBox="0 0 100 40"><path d="M5 32 C18 30, 24 18, 38 22 S58 28, 69 15 S86 10, 96 6" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round"/></svg></div><div class="kpi-label">Nhân viên mới tháng này</div><div class="kpi-value">5</div><div class="trend"><b class="up">+2</b> so với tháng trước</div></div>
-        <div class="kpi"><div class="kpi-head"><div class="kpi-icon orange"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M7 3h7l4 4v14H7V3Z"/></svg></div><svg class="spark" viewBox="0 0 100 40"><path d="M5 12 C20 25, 29 10, 43 18 S60 33, 72 22 S88 16, 96 30" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/></svg></div><div class="kpi-label">Hợp đồng sắp hết hạn</div><div class="kpi-value">3</div><div class="trend">Trong 30 ngày tới</div></div>
-        <div class="kpi"><div class="kpi-head"><div class="kpi-icon red"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="m9 12 2 2 4-5M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/></svg></div><svg class="spark" viewBox="0 0 100 40"><path d="M5 25 C20 15, 30 28, 45 20 S65 11, 78 19 S90 29, 96 14" fill="none" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/></svg></div><div class="kpi-label">Đơn chờ phê duyệt</div><div class="kpi-value">5</div><div class="trend">Cần xử lý hôm nay</div></div>
+        <div class="kpi"><div class="kpi-head"><div class="kpi-icon blue"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3ZM8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3Zm8 2c-2.2 0-6 1.1-6 3.3V18h12v-1.7c0-2.2-3.8-3.3-6-3.3ZM8 13c-2.2 0-6 1.1-6 3.3V18h6"/></svg></div><svg class="spark" viewBox="0 0 100 40"><path d="M5 30 C20 18, 30 25, 42 16 S67 12, 80 8 S92 14, 96 6" fill="none" stroke="#1677ff" stroke-width="3" stroke-linecap="round"/></svg></div><div class="kpi-label">Tổng nhân viên</div><div class="kpi-value">118</div><div class="trend">Đang hoạt động: <b>118 / 120</b></div></div>
+        <div class="kpi"><div class="kpi-head"><div class="kpi-icon green"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M12 5v14M5 12h14"/></svg></div><svg class="spark" viewBox="0 0 100 40"><path d="M5 32 C18 30, 24 18, 38 22 S58 28, 69 15 S86 10, 96 6" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/></svg></div><div class="kpi-label">Nhân viên mới tháng này</div><div class="kpi-value">5</div><div class="trend"><b class="up">+2</b> so với tháng trước</div></div>
+        <div class="kpi"><div class="kpi-head"><div class="kpi-icon orange"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M7 3h7l4 4v14H7V3Z"/></svg></div><svg class="spark" viewBox="0 0 100 40"><path d="M5 12 C20 25, 29 10, 43 18 S60 33, 72 22 S88 16, 96 30" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/></svg></div><div class="kpi-label">Hợp đồng sắp hết hạn</div><div class="kpi-value">3</div><div class="trend">Trong 30 ngày tới</div></div>
+        <div class="kpi"><div class="kpi-head"><div class="kpi-icon red"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="m9 12 2 2 4-5M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/></svg></div><svg class="spark" viewBox="0 0 100 40"><path d="M5 25 C20 15, 30 28, 45 20 S65 11, 78 19 S90 29, 96 14" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/></svg></div><div class="kpi-label">Đơn chờ phê duyệt</div><div class="kpi-value">5</div><div class="trend">Cần xử lý hôm nay</div></div>
       </section>
 
       <section class="grid">
@@ -310,38 +308,38 @@
           <div class="panel-head"><div class="panel-title">Hợp đồng sắp hết hạn <span class="count warn">3</span></div><a class="panel-link" href="#">Xem tất cả</a></div>
           <table><thead><tr><th>Nhân viên</th><th>Loại HĐ</th><th>Hết hạn</th><th>Còn lại</th></tr></thead><tbody>
             <tr><td><div class="person"><span class="mini-avatar">TB</span><span class="name">Trần Văn Bình</span></div></td><td><span class="badge orange">Thử việc</span></td><td>15/06/2026</td><td><div class="deadline red"><div class="deadline-top"><span>6 ngày</span></div><div class="bar"><span></span></div></div></td></tr>
-            <tr><td><div class="person"><span class="mini-avatar">NM</span><span class="name">Nguyễn Thị Mai</span></div></td><td><span class="badge gray">Xác định TH</span></td><td>28/06/2026</td><td><div class="deadline amber"><div class="deadline-top"><span>19 ngày</span></div><div class="bar"><span></span></div></div></td></tr>
-            <tr><td><div class="person"><span class="mini-avatar">LN</span><span class="name">Lê Hoàng Nam</span></div></td><td><span class="badge gray">Xác định TH</span></td><td>05/07/2026</td><td><div class="deadline green"><div class="deadline-top"><span>26 ngày</span></div><div class="bar"><span></span></div></div></td></tr>
+            <tr><td><div class="person"><span class="mini-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">NM</span><span class="name">Nguyễn Thị Mai</span></div></td><td><span class="badge gray">Xác định TH</span></td><td>28/06/2026</td><td><div class="deadline amber"><div class="deadline-top"><span>19 ngày</span></div><div class="bar"><span></span></div></div></td></tr>
+            <tr><td><div class="person"><span class="mini-avatar" style="background:linear-gradient(135deg,#10b981,#34d399)">LN</span><span class="name">Lê Hoàng Nam</span></div></td><td><span class="badge gray">Xác định TH</span></td><td>05/07/2026</td><td><div class="deadline green"><div class="deadline-top"><span>26 ngày</span></div><div class="bar"><span></span></div></div></td></tr>
           </tbody></table>
         </div>
 
         <div class="panel">
           <div class="panel-head"><div class="panel-title">Đơn chờ phê duyệt <span class="count red">5</span></div><a class="panel-link" href="#">Xem tất cả</a></div>
           <table><thead><tr><th>Người gửi</th><th>Loại</th><th>Ngày gửi</th><th></th></tr></thead><tbody>
-            <tr><td><div class="person"><span class="mini-avatar">PH</span><span class="name">Phạm Thị Hoa</span></div></td><td><span class="badge blue">Nghỉ phép năm</span></td><td>08/06</td><td><a class="panel-link">Xem</a></td></tr>
-            <tr><td><div class="person"><span class="mini-avatar">VT</span><span class="name">Võ Minh Tuấn</span></div></td><td><span class="badge blue">Nghỉ phép năm</span></td><td>07/06</td><td><a class="panel-link">Xem</a></td></tr>
-            <tr><td><div class="person"><span class="mini-avatar">ĐP</span><span class="name">Đặng Hữu Phúc</span></div></td><td><span class="badge amber">Nghỉ ốm</span></td><td>07/06</td><td><a class="panel-link">Xem</a></td></tr>
-            <tr><td><div class="person"><span class="mini-avatar">LH</span><span class="name">Lý Thanh Hằng</span></div></td><td><span class="badge blue">Nghỉ phép năm</span></td><td>06/06</td><td><a class="panel-link">Xem</a></td></tr>
+            <tr><td><div class="person"><span class="mini-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">PH</span><span class="name">Phạm Thị Hoa</span></div></td><td><span class="badge blue">Nghỉ phép năm</span></td><td>08/06</td><td><a class="panel-link">Xem</a></td></tr>
+            <tr><td><div class="person"><span class="mini-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">VT</span><span class="name">Võ Minh Tuấn</span></div></td><td><span class="badge blue">Nghỉ phép năm</span></td><td>07/06</td><td><a class="panel-link">Xem</a></td></tr>
+            <tr><td><div class="person"><span class="mini-avatar" style="background:linear-gradient(135deg,#6366f1,#818cf8)">ĐP</span><span class="name">Đặng Hữu Phúc</span></div></td><td><span class="badge amber">Nghỉ ốm</span></td><td>07/06</td><td><a class="panel-link">Xem</a></td></tr>
+            <tr><td><div class="person"><span class="mini-avatar" style="background:linear-gradient(135deg,#14b8a6,#5eead4)">LH</span><span class="name">Lý Thanh Hằng</span></div></td><td><span class="badge blue">Nghỉ phép năm</span></td><td>06/06</td><td><a class="panel-link">Xem</a></td></tr>
           </tbody></table>
         </div>
       </section>
 
       <section class="bottom">
         <div class="pay-card">
-          <div class="panel-title">Chi phí lương <a class="panel-link" style="margin-left:auto">Xem chi tiết</a></div>
+          <div class="panel-title" style="font-size:16px;font-weight:600;letter-spacing:-.01em">Chi phí lương <a class="panel-link" style="margin-left:auto;font-weight:600">Xem chi tiết</a></div>
           <div class="pay-main">
             <div><div class="muted">Tháng 05/2026</div><div class="money">1.247.500.000 &#x20AB;</div><div class="trend"><b class="down">&#8595; 2.3%</b> so với tháng trước</div></div>
-            <svg class="mini-chart" viewBox="0 0 220 80"><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#1677ff" stop-opacity=".22"/><stop offset="1" stop-color="#1677ff" stop-opacity="0"/></linearGradient></defs><path d="M5 62 C35 25, 57 55, 84 33 S137 23, 161 41 S200 16, 215 28 V80 H5Z" fill="url(#g)"/><path d="M5 62 C35 25, 57 55, 84 33 S137 23, 161 41 S200 16, 215 28" fill="none" stroke="#1677ff" stroke-width="5" stroke-linecap="round"/></svg>
+            <svg class="mini-chart" viewBox="0 0 220 80"><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#1677ff" stop-opacity=".16"/><stop offset="1" stop-color="#1677ff" stop-opacity="0"/></linearGradient></defs><path d="M5 62 C35 25, 57 55, 84 33 S137 23, 161 41 S200 16, 215 28 V80 H5Z" fill="url(#g)"/><path d="M5 62 C35 25, 57 55, 84 33 S137 23, 161 41 S200 16, 215 28" fill="none" stroke="#1677ff" stroke-width="3" stroke-linecap="round"/></svg>
           </div>
           <div style="margin-top:18px"><span class="badge green">Đã xác nhận</span></div>
         </div>
 
         <div class="activity">
-          <div class="panel-title">Hoạt động gần đây</div>
+          <div style="font-size:16px;font-weight:600;letter-spacing:-.01em">Hoạt động gần đây</div>
           <div class="activity-list">
             <div class="activity-item"><span class="activity-dot"></span><div><div class="activity-text">Phạm Thị Hoa gửi đơn nghỉ phép</div><div class="activity-time">5 phút trước</div></div></div>
-            <div class="activity-item"><span class="activity-dot" style="background:#f59e0b;box-shadow:0 0 0 5px rgba(245,158,11,.12)"></span><div><div class="activity-text">Hợp đồng của Trần Văn Bình còn 6 ngày</div><div class="activity-time">Hôm nay 09:20</div></div></div>
-            <div class="activity-item"><span class="activity-dot" style="background:#10b981;box-shadow:0 0 0 5px rgba(16,185,129,.12)"></span><div><div class="activity-text">Bảng lương tháng 05 đã xác nhận</div><div class="activity-time">Hôm qua 16:45</div></div></div>
+            <div class="activity-item"><span class="activity-dot" style="background:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.10)"></span><div><div class="activity-text">Hợp đồng của Trần Văn Bình còn 6 ngày</div><div class="activity-time">Hôm nay 09:20</div></div></div>
+            <div class="activity-item"><span class="activity-dot" style="background:#10b981;box-shadow:0 0 0 4px rgba(16,185,129,.10)"></span><div><div class="activity-text">Bảng lương tháng 05 đã xác nhận</div><div class="activity-time">Hôm qua 16:45</div></div></div>
           </div>
         </div>
       </section>
