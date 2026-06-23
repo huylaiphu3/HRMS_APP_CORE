@@ -10,6 +10,4 @@ public interface EmployeeService {
     EmployeeDTO findById(int id);
     EmployeeDTO findByName(String name);
     void deleteAll();
-
-    // List a = new List trong java -> mặc điinh array list
 }

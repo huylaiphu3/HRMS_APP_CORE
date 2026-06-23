@@ -95,7 +95,7 @@ So that the team can start developing features on a consistent, reproducible env
 | `PageData.java` | OK | Pagination wrapper |
 | `SecurityConfig.java` | OK | Spring Security filter chain |
 | `JwtAuthenticationFilter.java` | OK | OncePerRequestFilter, JWT validation |
-| `CustomUserDetails.java` | OK | userId, role, departmentId |
+| `CustomUserDetails.java` | OK | userId, userRole, departmentId |
 | `JwtUtil.java` | OK | HMAC-SHA256 token generation/validation |
 | `CorsConfig.java` | OK | Dev: localhost:4200, configurable origins |
 | `CacheConfig.java` | OK | Caffeine in-memory cache |
@@ -123,7 +123,7 @@ So that the team can start developing features on a consistent, reproducible env
 | `auth-layout/` | OK | Login page layout |
 | Page stubs | OK | dashboard, employee, department, position, contract, attendance, leave, payroll, approval, report, config, profile, login, 403, 404 |
 | Core services | OK | auth.service.ts, menu.service.ts |
-| Guards | OK | auth.guard.ts, role.guard.ts |
+| Guards | OK | auth.guard.ts, userRole.guard.ts |
 | Interceptors | OK | jwt.interceptor.ts |
 | Models | OK | api-response, menu, user models |
 

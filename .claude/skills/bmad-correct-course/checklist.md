@@ -220,7 +220,7 @@
   - Developer agent (for implementation)
   - Product Owner / Developer (for backlog changes)
   - Product Manager / Architect (for strategic changes)
-<action>Define responsibilities for each role</action>
+<action>Define responsibilities for each userRole</action>
 <status>[ ] Done / [ ] N/A / [ ] Action-needed</status>
 </check-item>
 

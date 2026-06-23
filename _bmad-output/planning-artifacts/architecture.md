@@ -50,11 +50,11 @@ Architecturally significant modules:
 - Notification: SMTP V1
 - Language: Vietnamese-only UI V1
 - Auth: username/password + JWT only (no SSO/LDAP V1)
-- One user = one role (single-role constraint)
+- One user = one userRole (single-userRole constraint)
 
 ### Cross-Cutting Concerns Identified
 
-1. **RBAC Authorization** — 3-tier role hierarchy (Admin > Manager > Employee) with scope filtering (company-wide / department / self-only).
+1. **RBAC Authorization** — 3-tier userRole hierarchy (Admin > Manager > Employee) with scope filtering (company-wide / department / self-only).
 2. **Audit Logging** — Automatic immutable recording of all CUD operations with old/new values. Must be implemented as infrastructure (AOP/interceptor), not per-module code.
 3. **Soft Delete** — Entities are never hard-deleted. All queries must respect active/inactive status.
 4. **Event-Driven Notifications** — Business events (leave request, approval, payroll confirmation, contract expiry) trigger dual-channel notifications (email + in-app).
@@ -192,13 +192,13 @@ Hibernate `ddl-auto=update` for dev environment, `ddl-auto=validate` for prod. S
 
 **JWT Implementation:**
 - Library: jjwt (io.jsonwebtoken)
-- Access token: HMAC-SHA256 signed, 30-minute TTL. Payload: `{ sub: userId, role, iat, exp }`
+- Access token: HMAC-SHA256 signed, 30-minute TTL. Payload: `{ sub: userId, userRole, iat, exp }`
 - Refresh token: UUID stored in `refresh_tokens` table (columns: token, user_id, expires_at, revoked). TTL 7 days.
 - Refresh flow: client sends refresh token → server validates in DB → issues new access + refresh token → old refresh token marked revoked (rotation).
 - JWT secret: loaded from env variable `JWT_SECRET` (minimum 256-bit).
 
 **Spring Security Filter Chain:**
-1. `JwtAuthenticationFilter` (extends `OncePerRequestFilter`): extracts JWT from `Authorization: Bearer` header → validates signature + expiration → creates `CustomUserDetails` (userId, role, departmentId) → sets `SecurityContextHolder`.
+1. `JwtAuthenticationFilter` (extends `OncePerRequestFilter`): extracts JWT from `Authorization: Bearer` header → validates signature + expiration → creates `CustomUserDetails` (userId, userRole, departmentId) → sets `SecurityContextHolder`.
 2. Endpoint authorization: `@PreAuthorize("hasRole('ADMIN')")` and custom method-level annotations for department-scoped access.
 3. Public endpoints: only `/api/v1/auth/login` and `/api/v1/auth/refresh`.
 
@@ -302,7 +302,7 @@ src/
 **Auth State & Route Guards:**
 - `AuthService` (Angular Service + Signals): stores user and tokens via `signal()`. Persisted in localStorage.
 - `JwtInterceptor` (HttpInterceptor): attaches `Authorization: Bearer` header on every request. On 401 → attempt token refresh → if fail → redirect to login.
-- `RoleGuard` (CanActivate): checks role from AuthService. Unauthorized → redirect to dashboard or 403 page.
+- `RoleGuard` (CanActivate): checks userRole from AuthService. Unauthorized → redirect to dashboard or 403 page.
 - Route structure: `/login`, `/dashboard`, `/employees`, `/leave-requests`, `/payroll`, `/settings`.
 - Lazy loading: feature modules loaded on demand via `loadComponent`/`loadChildren` in route config.
 
@@ -361,7 +361,7 @@ services:
 **Implementation Sequence:**
 1. Project scaffolding (Spring Initializr + Angular CLI) + Docker Compose setup
 2. BaseEntity + repository methods (foundation for all entities)
-3. JWT auth + Spring Security filter chain + user/role entities
+3. JWT auth + Spring Security filter chain + user/userRole entities
 4. Core modules build on top: User (profile + auth) → Contract → Attendance → Leave → Payroll
 5. Cross-cutting: Audit log AOP, notification service, caching
 6. Frontend: auth flow → layouts → feature modules in parallel with backend
@@ -402,7 +402,7 @@ services:
 - Component class: PascalCase + `Component` suffix — `UserListComponent`, `LeaveRequestFormComponent`
 - Service files: kebab-case — `user.service.ts`, `auth.service.ts`
 - Service class: PascalCase + `Service` suffix — `UserService`, `AuthService`
-- Guard files: kebab-case — `role.guard.ts`, `auth.guard.ts`
+- Guard files: kebab-case — `userRole.guard.ts`, `auth.guard.ts`
 - Interceptor files: kebab-case — `jwt.interceptor.ts`, `error.interceptor.ts`
 - Model/Interface files: kebab-case — `user.model.ts`, `api-response.model.ts`
 - Interfaces: PascalCase with `I` prefix — `IUser`, `ILeaveRequest`, `IApiResponse<T>`
@@ -655,7 +655,7 @@ hrms/
 │   │   │   ├── core/
 │   │   │   │   ├── services/auth.service.ts, notification.service.ts
 │   │   │   │   ├── interceptors/jwt.interceptor.ts, error.interceptor.ts
-│   │   │   │   └── guards/role.guard.ts, auth.guard.ts
+│   │   │   │   └── guards/userRole.guard.ts, auth.guard.ts
 │   │   │   ├── layouts/admin-layout/, employee-layout/
 │   │   │   ├── features/
 │   │   │   │   ├── auth/          (components/ services/ models/ auth.routes.ts)

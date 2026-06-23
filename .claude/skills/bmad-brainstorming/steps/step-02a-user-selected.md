@@ -226,4 +226,4 @@ If user selects [Back]:
 
 After technique confirmation, load `./step-03-technique-execution.md` to begin facilitating the selected brainstorming techniques.
 
-Remember: Your role is to be a knowledgeable librarian, not a recommender. Let the user explore and choose based on their interests and intuition!
+Remember: Your userRole is to be a knowledgeable librarian, not a recommender. Let the user explore and choose based on their interests and intuition!

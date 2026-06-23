@@ -124,21 +124,21 @@ Provide deeper insight into each recommended technique:
 - **Description:** [Detailed explanation]
 - **Best for:** [Why this matches their specific needs]
 - **Sample facilitation:** [Example of how we'll use this]
-- **Your role:** [What you'll do during this technique]
+- **Your userRole:** [What you'll do during this technique]
 
 **2. [Technique 2]:**
 
 - **Description:** [Detailed explanation]
 - **Best for:** [Why this builds on the first technique]
 - **Sample facilitation:** [Example of how we'll use this]
-- **Your role:** [What you'll do during this technique]
+- **Your userRole:** [What you'll do during this technique]
 
 **3. [Technique 3] (if applicable):**
 
 - **Description:** [Detailed explanation]
 - **Best for:** [Why this completes the sequence effectively]
 - **Sample facilitation:** [Example of how we'll use this]
-- **Your role:** [What you'll do during this technique]"
+- **Your userRole:** [What you'll do during this technique]"
 
 ### 5. Get User Confirmation
 

@@ -72,7 +72,7 @@ Behavioral. Visual specs live in `DESIGN.md.Components`.
 
 Behavioral. Visual contrast lives in `DESIGN.md`.
 
-- VoiceOver / TalkBack: every interactive element labeled with role + state. Save indicator announces `Saved` on transition.
+- VoiceOver / TalkBack: every interactive element labeled with userRole + state. Save indicator announces `Saved` on transition.
 - Dynamic type honored through `DESIGN.md` typography tokens. UI must remain legible at largest setting — no truncated controls.
 - Reduce Motion: skip the save-indicator fade; show `Saved.` immediately.
 - Tap targets ≥ 44pt (iOS) / 48dp (Android).

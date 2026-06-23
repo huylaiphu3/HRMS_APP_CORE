@@ -8,7 +8,6 @@ import java.util.Collection;
 
 @Getter
 public class CustomUserDetails extends User {
-
     private final Long userId;
     private final String role;
     private final Long departmentId;

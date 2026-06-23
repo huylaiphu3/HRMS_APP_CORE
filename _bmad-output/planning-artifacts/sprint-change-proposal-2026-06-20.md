@@ -44,7 +44,7 @@
 | **PRD** | Dính nặng | Xóa section 4.2, FR-4/5/6, sửa 50+ dòng |
 | **Epics** | Dính nặng | Sửa Epic 1 title + stories, bỏ Story 1.5, sửa scattered refs |
 | **Architecture** | ✅ Đã clean | Không cần thay đổi |
-| **UX Design** | Nhẹ | Bỏ System Admin role khỏi sidebar spec |
+| **UX Design** | Nhẹ | Bỏ System Admin userRole khỏi sidebar spec |
 | **Code** | ✅ Đã clean | Không cần thay đổi |
 | **sprint-status.yaml** | Cần cập nhật | Xóa entry 1-5 |
 
@@ -53,7 +53,7 @@
 | Cũ (4 roles) | Mới (3 roles) |
 |---|---|
 | System Admin | **XÓA** |
-| Admin (HR Admin) | Admin (HR Admin) — highest role |
+| Admin (HR Admin) | Admin (HR Admin) — highest userRole |
 | Manager | Manager |
 | Employee | Employee |
 
@@ -62,15 +62,15 @@
 | Thành phần | Cũ | Mới |
 |---|---|---|
 | BaseEntity | tenantId (String, immutable) | **Xóa field tenantId** |
-| JWT payload | sub, tenantId, role | sub, role |
+| JWT payload | sub, tenantId, userRole | sub, userRole |
 | TenantContext | ThreadLocal tenant filter | **Xóa hoàn toàn** |
 | Repository methods | findByTenantId(...) | findAll / findBy... (no tenant filter) |
 | Config | per-tenant (giờ làm, IP, BH...) | system-wide config table |
 | ARCH-8 | BaseEntity có tenantId | BaseEntity không có tenantId |
 | ARCH-9 | Tenant isolation via tenantId | **Xóa** |
-| ARCH-14 | JWT chứa tenantId | JWT chỉ chứa sub, role |
+| ARCH-14 | JWT chứa tenantId | JWT chỉ chứa sub, userRole |
 | ARCH-15 | refresh_tokens có tenant_id | refresh_tokens không có tenant_id |
-| ARCH-16 | TenantUserDetails (userId, tenantId, role, deptId) | UserDetails (userId, role, deptId) |
+| ARCH-16 | TenantUserDetails (userId, tenantId, userRole, deptId) | UserDetails (userId, userRole, deptId) |
 | ARCH-17 | TenantContext ThreadLocal | **Xóa** |
 | ARCH-26 | TenantAccessDeniedException | **Xóa** |
 
@@ -171,7 +171,7 @@ Cũng sửa:
 ```
 
 **SỬA FR-1:**
-- "JWT payload chứa: user_id, tenant_id, role" → "JWT payload chứa: user_id, role"
+- "JWT payload chứa: user_id, tenant_id, userRole" → "JWT payload chứa: user_id, userRole"
 
 **SỬA FR-2:**
 - "4 vai trò (System Admin, Admin, Manager, Employee). Tenant_id filter mọi request." → "3 vai trò (Admin, Manager, Employee)."
@@ -194,7 +194,7 @@ Thay thế pattern lặp:
 - "Scoped tenant" → xóa
 - "chỉ tenant hiện tại" → xóa
 - "tenant_id/employee_id/" → "employee_id/"
-- "kiểm tra quyền (tenant + role)" → "kiểm tra quyền (role)"
+- "kiểm tra quyền (tenant + userRole)" → "kiểm tra quyền (userRole)"
 
 #### Change P9: Section 5 — Non-Goals (Lines 596-597)
 
@@ -280,7 +280,7 @@ Trong "Ngoài phạm vi MVP":
 
 **SỬA FR-1:**
 ```
-FR-1: Đăng nhập bằng username/password — trả JWT access token (30 phút) + refresh token (7 ngày). JWT payload: user_id, role. Sai 5 lần → khóa 15 phút.
+FR-1: Đăng nhập bằng username/password — trả JWT access token (30 phút) + refresh token (7 ngày). JWT payload: user_id, userRole. Sai 5 lần → khóa 15 phút.
 ```
 
 **SỬA FR-2:**
@@ -309,9 +309,9 @@ FR-3: Quản lý tài khoản — Admin tạo/vô hiệu hóa/reset password. T�
 - ARCH-8: Bỏ "tenantId (String, immutable after creation)"
 - ARCH-9: XÓA hoàn toàn
 - ARCH-12: "tenant config 1hr" → "system config 1hr"
-- ARCH-14: "Payload: sub(userId), tenantId, role" → "Payload: sub(userId), role"
+- ARCH-14: "Payload: sub(userId), tenantId, userRole" → "Payload: sub(userId), userRole"
 - ARCH-15: Bỏ "tenant_id" khỏi refresh_tokens
-- ARCH-16: "TenantUserDetails (userId, tenantId, role, departmentId)" → "CustomUserDetails (userId, role, departmentId)"
+- ARCH-16: "TenantUserDetails (userId, tenantId, userRole, departmentId)" → "CustomUserDetails (userId, userRole, departmentId)"
 - ARCH-17: XÓA hoàn toàn (TenantContext)
 - ARCH-21: Bỏ "Tenant implicit from JWT"
 - ARCH-26: Bỏ "TenantAccessDeniedException"
@@ -357,14 +357,14 @@ User đăng nhập bằng username/password, nhận JWT, phân quyền đúng va
 #### Change E5: Story 1.3 — JWT Authentication (Lines 373-409)
 
 **SỬA:**
-- "JWT payload contains: sub (userId), tenantId, role" → "JWT payload contains: sub (userId), role"
+- "JWT payload contains: sub (userId), tenantId, userRole" → "JWT payload contains: sub (userId), userRole"
 
 #### Change E6: Story 1.4 — RBAC (Lines 411-444)
 
 **SỬA title:** "RBAC Authorization" (bỏ "& Tenant Data Isolation")
 
 **XÓA:**
-- Toàn bộ acceptance criteria về SYSTEM_ADMIN role
+- Toàn bộ acceptance criteria về SYSTEM_ADMIN userRole
 - "all repository methods include `AND tenant_id = ?`"
 - "no result from Tenant B is ever returned"
 

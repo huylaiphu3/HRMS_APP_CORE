@@ -36,7 +36,7 @@ Party mode accepts optional arguments when invoked:
 
 4. **Load project context** — search for `**/project-context.md`. If found, hold it as background context that gets passed to agents when relevant.
 
-5. **Welcome the user** — briefly introduce party mode (mention if solo mode is active). Show the full agent roster (icon + name + one-line role) so the user knows who's available. Ask what they'd like to discuss.
+5. **Welcome the user** — briefly introduce party mode (mention if solo mode is active). Show the full agent roster (icon + name + one-line userRole) so the user knows who's available. Ask what they'd like to discuss.
 
 ## The Core Loop
 
@@ -44,7 +44,7 @@ For each user message:
 
 ### 1. Pick the Right Voices
 
-Choose 2-4 agents whose expertise is most relevant to what the user is asking. Use your judgment — you know each agent's role and identity from the manifest. Some guidelines:
+Choose 2-4 agents whose expertise is most relevant to what the user is asking. Use your judgment — you know each agent's userRole and identity from the manifest. Some guidelines:
 
 - **Simple question**: 2 agents with the most relevant expertise
 - **Complex or cross-cutting topic**: 3-4 agents from different domains

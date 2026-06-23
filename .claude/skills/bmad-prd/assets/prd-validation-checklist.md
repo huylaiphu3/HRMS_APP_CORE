@@ -116,7 +116,7 @@ For standalone PRDs (no downstream), this dimension matters less — say so.
 Has the PRD been forced into a shape that doesn't match the product?
 
 - Consumer product / multi-stakeholder B2B / meaningful UX → UJs with named protagonists are load-bearing.
-- Internal tool, single-operator role → capability spec shape; UJs may be overhead; SMs may be operational rather than user-facing.
+- Internal tool, single-operator userRole → capability spec shape; UJs may be overhead; SMs may be operational rather than user-facing.
 - Regulatory or compliance update → constraint traceability is non-negotiable; UJs may be irrelevant.
 - Hobby / solo → rigor light, substance bar still applies.
 - Brownfield → existing-code references must be accurate; new UJs and existing UJs must be distinguished.

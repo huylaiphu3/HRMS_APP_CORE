@@ -56,7 +56,7 @@ The workspace persists; stop and resume freely.
 
 **Form-factor.** If not stated in sources, probe — mobile / web / desktop / multi-surface / hardware / API.
 
-**User Journeys are captured, not authored.** When UJs are warranted (consumer / multi-stakeholder B2B / meaningful UX — drop or downscale for internal tooling with a single operator role, regulatory-only updates, hobby/solo, pure technical PRDs), prompt the user to narrate a real session with a named protagonist (Mary, mom of three — not "the user") — what the person does, in what order, where it lands — then structure the answer into UJ-N form and confirm. Persona context lives inline at the moments that matter; no standalone persona section.
+**User Journeys are captured, not authored.** When UJs are warranted (consumer / multi-stakeholder B2B / meaningful UX — drop or downscale for internal tooling with a single operator userRole, regulatory-only updates, hobby/solo, pure technical PRDs), prompt the user to narrate a real session with a named protagonist (Mary, mom of three — not "the user") — what the person does, in what order, where it lands — then structure the answer into UJ-N form and confirm. Persona context lives inline at the moments that matter; no standalone persona section.
 
 ## PRD Discipline
 

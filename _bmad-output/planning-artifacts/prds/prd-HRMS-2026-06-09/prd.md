@@ -90,19 +90,19 @@ V1 bao gồm: hồ sơ nhân viên, hợp đồng lao động, chấm công, ngh
 
 **Mô tả:** Hệ thống xác thực người dùng bằng username/password, cấp JWT token cho các request tiếp theo. Phân quyền theo 3 vai trò: Admin, Manager, Employee.
 
-**Quyết định kiến trúc: Một user = một vai trò.** Trade-off: đơn giản hóa RBAC và JWT (1 role per token, không cần role-switching UI) nhưng hạn chế flexibility — nhân viên SME đôi khi kiêm nhiệm (vừa Manager vừa HR). Chấp nhận cho V1 vì đa số SME 50–500 người có phân vai rõ ràng. Multi-role deferred to V2 nếu có nhu cầu thực tế.
+**Quyết định kiến trúc: Một user = một vai trò.** Trade-off: đơn giản hóa RBAC và JWT (1 userRole per token, không cần userRole-switching UI) nhưng hạn chế flexibility — nhân viên SME đôi khi kiêm nhiệm (vừa Manager vừa HR). Chấp nhận cho V1 vì đa số SME 50–500 người có phân vai rõ ràng. Multi-userRole deferred to V2 nếu có nhu cầu thực tế.
 
 **Functional Requirements:**
 
 #### FR-1: Đăng nhập bằng username/password
 
-Người dùng đăng nhập bằng username và password. Hệ thống trả về JWT access token (chứa role) + refresh token. Realizes UJ-1, UJ-2.
+Người dùng đăng nhập bằng username và password. Hệ thống trả về JWT access token (chứa userRole) + refresh token. Realizes UJ-1, UJ-2.
 
 **Testable:**
 - Đăng nhập đúng → trả JWT access token (TTL 30 phút) và refresh token (TTL 7 ngày).
 - Đăng nhập sai 5 lần liên tiếp → khóa tài khoản 15 phút.
 - Refresh token hợp lệ → cấp access token mới mà không cần đăng nhập lại.
-- JWT payload chứa: user_id, role.
+- JWT payload chứa: user_id, userRole.
 
 #### FR-2: Phân quyền theo vai trò (RBAC)
 
@@ -413,7 +413,7 @@ Admin xem, download, xóa tài liệu của nhân viên. Employee xem và downlo
 - Admin xem danh sách tài liệu nhân viên → hiển thị tên file, loại, ngày upload, người upload.
 - Employee chỉ xem/download tài liệu của mình.
 - Xóa tài liệu → soft delete (file vẫn tồn tại trên storage, đánh dấu deleted). `[ASSUMPTION: Dùng local filesystem storage trong V1. Cloud storage (S3) deferred to V2.]`
-- Download file → kiểm tra quyền truy cập (role-based).
+- Download file → kiểm tra quyền truy cập (userRole-based).
 
 ---
 
@@ -465,7 +465,7 @@ Admin tạo và chỉnh sửa Approval Workflow Template hệ thống, per-modul
 
 **Testable:**
 - Admin tạo workflow cho module "Nghỉ phép": Step 1 = Team Lead, Step 2 = Manager, Step 3 = HR Admin → lưu thành công.
-- Mỗi step gán theo vai trò (role-based: Manager, HR). `[ASSUMPTION: V1 hỗ trợ role-based assignment. Position-based assignment (chỉ định người cụ thể cho từng step) cũng hỗ trợ nhưng optional.]`
+- Mỗi step gán theo vai trò (userRole-based: Manager, HR). `[ASSUMPTION: V1 hỗ trợ userRole-based assignment. Position-based assignment (chỉ định người cụ thể cho từng step) cũng hỗ trợ nhưng optional.]`
 - Chỉnh sửa workflow → thêm/xóa/sắp xếp lại step. Thay đổi chỉ áp dụng cho đơn mới, đơn đang trong pipeline giữ workflow cũ.
 - Mỗi module chỉ có một workflow active tại một thời điểm hệ thống.
 
@@ -553,7 +553,7 @@ Admin xem bảng lương tổng hợp theo tháng: mỗi nhân viên một dòng
 - **Không SSO/LDAP** — chỉ username/password + JWT.
 - **Không parallel approval** — V1 chỉ sequential workflow (tuần tự). Parallel approval (nhiều người duyệt đồng thời cùng bước) deferred to V2.
 - **Không cấu trúc tổ chức phân cấp sâu** — V1 chỉ Department + Position. Hierarchy (Khối → Phòng ban → Team) deferred to V2.
-- **Không multi-role per user** — mỗi user chỉ có 1 vai trò. Multi-role deferred to V2.
+- **Không multi-userRole per user** — mỗi user chỉ có 1 vai trò. Multi-userRole deferred to V2.
 
 ## 6. Phạm vi MVP
 
@@ -580,7 +580,7 @@ Admin xem bảng lương tổng hợp theo tháng: mỗi nhân viên một dòng
 - OT request qua approval workflow → V2
 - Cấu trúc tổ chức phân cấp (Khối/Team) → V2
 - SSO/LDAP hệ thống → V2
-- Multi-role per user → V2
+- Multi-userRole per user → V2
 - Real-time notifications (WebSocket/SSE) → V2
 - Mobile native app → V2+
 - Tích hợp máy chấm công vật lý → V2+
@@ -661,7 +661,7 @@ Admin xem bảng lương tổng hợp theo tháng: mỗi nhân viên một dòng
 - **§4.9** — Audit log immutable, không có retention policy trong V1.
 - **§4.10 FR-30** — Giới hạn 10MB/file, 20 file/nhân viên. Local filesystem storage.
 - **§4.10 FR-31** — Local filesystem storage V1. Cloud storage (S3) deferred to V2.
-- **§4.12 FR-35** — V1 hỗ trợ role-based assignment cho workflow steps. Position-based optional.
+- **§4.12 FR-35** — V1 hỗ trợ userRole-based assignment cho workflow steps. Position-based optional.
 - **§4.12 FR-36** — V1 chỉ sequential approval. Parallel approval deferred to V2.
 - **§4.12 FR-37** — Workflow mặc định Employee → Manager → HR Admin. Approver unavailable → escalate lên Admin.
 - **§4.13 FR-38** — V1 chỉ import nhân viên từ Excel (500 dòng/lần). Import chấm công/nghỉ phép lịch sử deferred.

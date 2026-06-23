@@ -3,11 +3,25 @@
 -- DEPENDENCY: The INSERT below requires the `users` table created by User.java @Entity (Story 1.3).
 -- Uncomment in Story 1.3 after User entity is created and Hibernate generates the schema.
 --
--- Default admin: email=admin@hrms.vn, password=Admin@123 (BCrypt 12 rounds, cost factor 12)
---
--- INSERT INTO users (id, email, password_hash, full_name, role, status, active, created_at, updated_at)
--- SELECT 1, 'admin@hrms.vn',
---        '$2a$12$LJ3UlGf2ZOi0YBCBHxZGBOQUEXBzjXTrZMj5fRmKL2nNqFZ.QR2Iq',
---        'Quản trị viên', 'ADMIN', 'ACTIVE', true, NOW(), NOW()
--- FROM DUAL
--- WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@hrms.vn');
+-- Default admin: username=admin, password=Admin@123 (BCrypt 12 rounds, cost factor 12)
+
+-- INSERT INTO user (
+--     id, username, password, full_name,
+--     user_role, user_status, active,
+--     failed_login_attempts,
+--     created_at, updated_at
+-- )
+-- SELECT
+--     1,
+--     'admin',
+--     '$2a$12$LJ3UlGf2ZOi0YBCBHxZGBOQUEXBzjXTrZMj5fRmKL2nNqFZ.QR2Iq',
+--     'Full Name',
+--     'ADMIN',
+--     'ACTIVE',
+--     true,
+--     0,
+--     NOW(),
+--     NOW()
+--     WHERE NOT EXISTS (
+--     SELECT 1 FROM user WHERE username = 'admin'
+-- );

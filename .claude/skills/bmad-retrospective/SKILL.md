@@ -881,7 +881,7 @@ Amelia (Developer): "I want specific, achievable actions with clear owners. Not 
 <action>Create specific action items with:</action>
 
 - Clear description of the action
-- Assigned owner (specific agent or role)
+- Assigned owner (specific agent or userRole)
 - Timeline or deadline
 - Success criteria (how we'll know it's done)
 - Category (process, technical, documentation, team, etc.)

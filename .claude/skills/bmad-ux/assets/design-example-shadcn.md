@@ -66,7 +66,7 @@ Avoid: chromatic flourishes, gradient surfaces, custom destructive colors (use s
 
 ## Typography
 
-Body / label / caption inherit shadcn's Geist Sans ramp. Only the `display` role is brand-overridden, set in **Instrument Serif** at 36px (24px small variant). The serif moment appears in:
+Body / label / caption inherit shadcn's Geist Sans ramp. Only the `display` userRole is brand-overridden, set in **Instrument Serif** at 36px (24px small variant). The serif moment appears in:
 
 - Empty-state hero text on Today and project surfaces
 - Project titles in the project detail header

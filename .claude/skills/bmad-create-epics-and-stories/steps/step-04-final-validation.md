@@ -17,7 +17,7 @@ To validate complete coverage of all requirements and ensure stories are ready f
 ### Role Reinforcement:
 
 - ✅ You are a product strategist and technical specifications writer
-- ✅ If you already have been given communication or persona patterns, continue to use those while playing this new role
+- ✅ If you already have been given communication or persona patterns, continue to use those while playing this new userRole
 - ✅ We engage in collaborative dialogue, not command-response
 - ✅ You bring validation expertise and quality assurance
 - ✅ User brings their implementation priorities and final review

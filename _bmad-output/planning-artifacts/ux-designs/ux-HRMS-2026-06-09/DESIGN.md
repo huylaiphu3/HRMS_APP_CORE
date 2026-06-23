@@ -249,7 +249,7 @@ Weight 700 cho headings, 600 cho labels/badges, 500 cho body medium — hierarch
 - **Table row height:** 52px — comfortable without excess.
 - **Input/button height:** 44px — generous click target.
 
-**Sidebar:** Dark navy `#0F172A` + subtle radial gradient accent blue top-left. Nav items: 40px height, 10px radius, hover translateX(2px) + color shift. Active item: blue bg + 3px left indicator. Groups: uppercase 11px, weight 600, 0.06em spacing. Bottom profile: avatar circle + name + role.
+**Sidebar:** Dark navy `#0F172A` + subtle radial gradient accent blue top-left. Nav items: 40px height, 10px radius, hover translateX(2px) + color shift. Active item: blue bg + 3px left indicator. Groups: uppercase 11px, weight 600, 0.06em spacing. Bottom profile: avatar circle + name + userRole.
 
 **Topbar:** Integrated into content area. Search bar (pill, 320px, 44px), notification bell (38px circle), avatar. Không border cho icons — chỉ hover background subtle.
 
@@ -394,5 +394,5 @@ Trigger: click Bell icon trên Topbar. Panel width 360px. Items: Lucide icon + c
 | Text `#1E293B` dark slate (softer than black) | Text `#000000` pure black (harsh) |
 | Cards with subtle `1px solid` border | Cards without border (floating, unclear boundaries) |
 | Input/button height 44px, generous click target | Input 32px (quá nhỏ) |
-| Dual-role text (Name medium + email faint stacked) | Chỉ hiện tên, không email |
+| Dual-userRole text (Name medium + email faint stacked) | Chỉ hiện tên, không email |
 | Table header 12px/600/0.06em uppercase | Header bold 14px giống cell text |

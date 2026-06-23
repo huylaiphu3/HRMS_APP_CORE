@@ -7,7 +7,7 @@ description: Authors and updates customization overrides for installed BMad skil
 
 Translate the user's intent into a correctly-placed TOML override file under `{project-root}/_bmad/custom/` for a customizable agent or workflow skill. Discover, route, author, write, verify.
 
-Scope v1: per-skill `[agent]` overrides (`bmad-agent-<role>.toml` / `.user.toml`) and per-skill `[workflow]` overrides (`bmad-<workflow>.toml` / `.user.toml`). Central config (`{project-root}/_bmad/custom/config.toml`) is out of scope — point users at the [How to Customize BMad guide](https://docs.bmad-method.org/how-to/customize-bmad/).
+Scope v1: per-skill `[agent]` overrides (`bmad-agent-<userRole>.toml` / `.user.toml`) and per-skill `[workflow]` overrides (`bmad-<workflow>.toml` / `.user.toml`). Central config (`{project-root}/_bmad/custom/config.toml`) is out of scope — point users at the [How to Customize BMad guide](https://docs.bmad-method.org/how-to/customize-bmad/).
 
 When the target's `customize.toml` doesn't expose what the user wants, say so plainly. Don't invent fields.
 
@@ -64,7 +64,7 @@ Intent outside the exposed surface (step logic, ordering, anything not in `custo
 Translate plain-English into TOML against the target's `customize.toml` fields. If an existing override was read, frame the change as additive.
 
 Merge semantics:
-- **Scalars** (`icon`, `role`, `*_template`, `on_complete`) — override wins.
+- **Scalars** (`icon`, `userRole`, `*_template`, `on_complete`) — override wins.
 - **Append arrays** (`persistent_facts`, `activation_steps_prepend`/`append`, `principles`) — team/user entries append in order.
 - **Keyed arrays of tables** (menu items with `code` or `id`) — matching keys replace, new keys append.
 

@@ -217,7 +217,7 @@ Cần import: `org.springframework.cache.caffeine.CaffeineCache`, `org.springfra
 -- NOTE: Uncomment below AFTER Story 1.3 creates User entity
 -- (users table is created by Hibernate when User.java @Entity exists)
 -- Default admin: password = Admin@123 (BCrypt 12 rounds)
--- INSERT INTO users (id, email, password_hash, full_name, role, status, active, created_at, updated_at)
+-- INSERT INTO users (id, email, password_hash, full_name, userRole, status, active, created_at, updated_at)
 -- SELECT 1, 'admin@hrms.vn', '$2a$12$...', 'Quản trị viên', 'ADMIN', 'ACTIVE', true, NOW(), NOW()
 -- FROM DUAL
 -- WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@hrms.vn');

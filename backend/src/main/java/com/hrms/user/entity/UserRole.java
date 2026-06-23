@@ -1,5 +1,5 @@
 package com.hrms.user.entity;
 
-public enum ROLE {
+public enum UserRole {
     USER,ADMIN
 }

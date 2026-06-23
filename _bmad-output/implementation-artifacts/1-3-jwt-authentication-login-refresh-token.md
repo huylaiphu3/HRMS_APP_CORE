@@ -13,7 +13,7 @@ So that I can securely access the system with automatic session refresh.
 1. **AC-1: Login thành công trả tokens**
    - Given user hợp lệ POST `/api/v1/auth/login` với `{ username, password }`
    - Then nhận `ApiResponse<LoginResponse>` code 200: `accessToken` (JWT HMAC-SHA256, 30min), `refreshToken` (UUID, 7 ngày)
-   - And JWT payload: `sub` (userId), `role`, `iat`, `exp`
+   - And JWT payload: `sub` (userId), `userRole`, `iat`, `exp`
    - And password verified bằng bcrypt (cost 12)
    - And response: `{ "code": 200, "message": "Thành công", "data": { "accessToken": "...", "refreshToken": "..." } }`
 
@@ -56,7 +56,7 @@ So that I can securely access the system with automatic session refresh.
 ## Tasks / Subtasks
 
 - [ ] Task 1: Tạo User entity và repository
-  - [ ] 1.1: Tạo `com.hrms.user.entity.User` extends BaseEntity — email, passwordHash, fullName, role (enum), status (enum), failedLoginAttempts, lockedUntil
+  - [ ] 1.1: Tạo `com.hrms.user.entity.User` extends BaseEntity — email, passwordHash, fullName, userRole (enum), status (enum), failedLoginAttempts, lockedUntil
   - [ ] 1.2: Tạo enum `UserRole` (ADMIN, MANAGER, EMPLOYEE) trong `com.hrms.user.entity`
   - [ ] 1.3: Tạo enum `UserStatus` (ACTIVE, INACTIVE, LOCKED) trong `com.hrms.user.entity`
   - [ ] 1.4: Tạo `com.hrms.user.repository.UserRepository` extends JpaRepository với `findByEmail(String email)`
@@ -146,8 +146,8 @@ public class User extends BaseEntity {
     private String fullName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private UserRole role;
+    @Column(name = "userRole", nullable = false)
+    private UserRole userRole;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -328,7 +328,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 Uncomment hoàn toàn đoạn INSERT trong `data.sql`:
 ```sql
-INSERT INTO users (id, email, password_hash, full_name, role, status, active, created_at, updated_at)
+INSERT INTO users (id, email, password_hash, full_name, userRole, status, active, created_at, updated_at)
 SELECT 1, 'admin@hrms.vn',
        '$2a$12$LJ3UlGf2ZOi0YBCBHxZGBOQUEXBzjXTrZMj5fRmKL2nNqFZ.QR2Iq',
        'Quản trị viên', 'ADMIN', 'ACTIVE', true, NOW(), NOW()
@@ -443,7 +443,7 @@ class AuthServiceTest {
 - Controller: `AuthController`
 - DTO suffix: `Request` / `Response` — `LoginRequest`, `LoginResponse`, `RefreshTokenRequest`
 - DB table names: `users`, `refresh_tokens` (snake_case plural — ARCH-37)
-- DB column names: `email`, `password_hash`, `full_name`, `role`, `status`, `failed_login_attempts`, `locked_until`, `force_password_change` (snake_case — ARCH-37)
+- DB column names: `email`, `password_hash`, `full_name`, `userRole`, `status`, `failed_login_attempts`, `locked_until`, `force_password_change` (snake_case — ARCH-37)
 
 ### API Endpoints
 
@@ -466,7 +466,7 @@ POST /api/v1/auth/refresh
 
 ```java
 // Các method GIỮ NGUYÊN:
-generateAccessToken(Long userId, String role)  // ← DÙNG trong AuthServiceImpl
+generateAccessToken(Long userId, String userRole)  // ← DÙNG trong AuthServiceImpl
 validateToken(String token)                    // ← DÙNG trong JwtAuthenticationFilter
 getUserId(String token)                        // ← DÙNG trong JwtAuthenticationFilter
 getRole(String token)                          // ← DÙNG trong JwtAuthenticationFilter
@@ -506,9 +506,9 @@ Tất cả dependencies đã có từ Story 1.1 (pom.xml):
 
 ### Architecture Compliance Checklist
 
-- ✅ ARCH-14: jjwt, HMAC-SHA256, 30min, payload: sub(userId), role, iat, exp
+- ✅ ARCH-14: jjwt, HMAC-SHA256, 30min, payload: sub(userId), userRole, iat, exp
 - ✅ ARCH-15: Refresh token = UUID trong `refresh_tokens` table (token, user_id, expires_at, revoked), 7 ngày, rotation
-- ✅ ARCH-16: JwtAuthenticationFilter → CustomUserDetails(userId, role, departmentId) — KHÔNG thay đổi filter
+- ✅ ARCH-16: JwtAuthenticationFilter → CustomUserDetails(userId, userRole, departmentId) — KHÔNG thay đổi filter
 - ✅ ARCH-19: BCryptPasswordEncoder strength 12 (đã có trong SecurityConfig)
 - ✅ ARCH-21: Base path /api/v1/, plural nouns
 - ✅ ARCH-22: Unified ApiResponse<T> {code, message, data}
@@ -536,7 +536,7 @@ Khi `User.save()` được gọi trong `AuthServiceImpl`, Spring JPA Auditing s�
 - [Source: epics.md — Story 1.3 acceptance criteria, lines 357-393]
 - [Source: architecture.md — ARCH-14, ARCH-15, ARCH-16, ARCH-19, ARCH-37, ARCH-38]
 - [Source: Story 1.2 Dev Agent Record — Spring Boot 4 test patterns, @SQLRestriction]
-- [Source: sprint-change-proposal-2026-06-20.md — JWT payload chỉ có sub(userId)+role, KHÔNG có tenantId]
+- [Source: sprint-change-proposal-2026-06-20.md — JWT payload chỉ có sub(userId)+userRole, KHÔNG có tenantId]
 
 ## Dev Agent Record
 

@@ -13,7 +13,7 @@ updated: 2026-06-20
 
 Desktop-first responsive web. NG-ZORRO (Ant Design for Angular) trên Angular 17.x + TypeScript. UI library: `ng-zorro-antd` — kế thừa 100% component defaults. `DESIGN.md` là visual identity reference — định nghĩa brand-layer delta (dark sidebar, semantic color mapping, composite components) theo hướng **Modern Minimalist** (cảm hứng Linear, Notion, Vercel, Stripe). Experience spine này owns *cách hệ thống hoạt động*.
 
-Hệ thống nội bộ cho một công ty duy nhất — không phải SaaS, không multi-tenant. User có đúng một role. Ba vai trò: Admin/HR Admin (toàn hệ thống), Manager (phòng ban), Employee (cá nhân).
+Hệ thống nội bộ cho một công ty duy nhất — không phải SaaS, không multi-tenant. User có đúng một userRole. Ba vai trò: Admin/HR Admin (toàn hệ thống), Manager (phòng ban), Employee (cá nhân).
 
 Ngôn ngữ giao diện: **Tiếng Việt** duy nhất trong V1.
 
@@ -28,8 +28,8 @@ Ngôn ngữ giao diện: **Tiếng Việt** duy nhất trong V1.
 | Dashboard | — | All | `dashboard` |
 | Nhân sự | Nhân viên, Phòng ban, Chức vụ | Admin, Manager (read) | `employee-list`, `department-list`, `position-list` |
 | Hợp đồng | — | Admin | `contract-list` |
-| Chấm công | — | All (scope theo role) | `attendance` |
-| Nghỉ phép | — | All (scope theo role) | `leave` |
+| Chấm công | — | All (scope theo userRole) | `attendance` |
+| Nghỉ phép | — | All (scope theo userRole) | `leave` |
 | Tiền lương | — | Admin | `payroll` |
 | Phê duyệt | — | Admin, Manager | `approval-inbox` |
 | Báo cáo | — | Admin | `report` |
@@ -59,7 +59,7 @@ Employee không thấy sidebar item nào ngoài scope — không hiện rồi di
 | Surface | URL Pattern | Content | Role |
 |---------|-------------|---------|------|
 | Login | `/login` | Form đăng nhập (username + password) | Public |
-| Dashboard | `/dashboard` | Stat cards + alerts (role-scoped) | All |
+| Dashboard | `/dashboard` | Stat cards + alerts (userRole-scoped) | All |
 | Employee List | `/employees` | ProTable: tìm, lọc, CRUD, export/import | Admin; Manager (read) |
 | Employee Detail | `/employees/:id` | Tabs: Thông tin, Hợp đồng, Chấm công, Nghỉ phép, Lương, Tài liệu | Admin; Manager (read phòng ban); Employee (self) |
 | Department List | `/departments` | ProTable: CRUD phòng ban | Admin |
@@ -229,7 +229,7 @@ Behavioral. Visual contrast kế thừa NG-ZORRO (WCAG AA compliant by default).
 - WCAG 2.1 AA cho web surface. NG-ZORRO components đáp ứng sẵn.
 - `Tab` order theo reading order trên mọi surface. `Esc` close modal/drawer/popover.
 - Angular Reactive Forms + NZ Form: `aria-required`, `aria-invalid`, error text liên kết qua `aria-describedby` (NG-ZORRO default).
-- NZ Table: `role="table"`, header cells dùng `scope="col"` (NG-ZORRO default).
+- NZ Table: `userRole="table"`, header cells dùng `scope="col"` (NG-ZORRO default).
 - Status Tag: không chỉ dùng màu — kèm text label ("Đã duyệt", "Từ chối"). Color không phải kênh thông tin duy nhất.
 - Focus ring: NG-ZORRO default outline. Không customize.
 - Ảnh/icon decorative: `aria-hidden="true"`. Avatar có `alt` = tên nhân viên.

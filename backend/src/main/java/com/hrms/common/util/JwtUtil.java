@@ -1,5 +1,6 @@
 package com.hrms.common.util;
 
+import com.hrms.user.entity.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -26,21 +27,12 @@ public class JwtUtil {
         this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
-    public String generateAccessToken(Long userId, String role) {
+    public String generateAccessToken(Long userId, UserRole userRole) {
         return Jwts.builder()
                 .subject(userId.toString())
-                .claim("role", role)
+                .claim("role", userRole.name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
-                .signWith(key)
-                .compact();
-    }
-
-    public String generateRefreshToken(Long userId) {
-        return Jwts.builder()
-                .subject(userId.toString())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
                 .signWith(key)
                 .compact();
     }

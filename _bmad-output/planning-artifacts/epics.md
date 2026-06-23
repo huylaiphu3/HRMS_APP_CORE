@@ -17,7 +17,7 @@ This document provides the complete epic and story breakdown for HRMS, decomposi
 
 ### Functional Requirements
 
-FR-1: Đăng nhập bằng username/password — trả JWT access token (30 phút) + refresh token (7 ngày). JWT payload: user_id, role. Sai 5 lần → khóa 15 phút.
+FR-1: Đăng nhập bằng username/password — trả JWT access token (30 phút) + refresh token (7 ngày). JWT payload: user_id, userRole. Sai 5 lần → khóa 15 phút.
 FR-2: Phân quyền RBAC — 3 vai trò (Admin, Manager, Employee). Employee → 403 khi truy cập ngoài scope. Manager chỉ thấy phòng ban mình.
 FR-3: Quản lý tài khoản — Admin tạo/vô hiệu hóa/reset password. Tạo nhân viên → auto tạo tài khoản + gửi email.
 FR-7: CRUD Nhân viên — tạo/xem/sửa/vô hiệu hóa. Mã nhân viên tự sinh. Soft delete only. Bắt buộc: họ tên, CCCD, ngày sinh, giới tính, phòng ban, chức vụ, ngày vào làm.
@@ -44,7 +44,7 @@ FR-27: Ghi nhận audit log tự động — mọi CREATE/UPDATE/DELETE. Ghi: us
 FR-28: Xem & Tra cứu audit log — filter: module, user, NV liên quan, thời gian, action. Phân trang.
 FR-29: Login History — ghi đăng nhập: user, thời gian, IP, user agent, success/fail + lý do.
 FR-30: Upload tài liệu NV — PDF/JPG/PNG/DOCX. 10MB/file, 20 file/NV. Lưu user_id/employee_id/. Trùng tên → đổi tên auto.
-FR-31: Quản lý & Xem tài liệu — Admin xem/download/xóa. Employee xem/download cá nhân. Soft delete. Kiểm tra quyền (role-based).
+FR-31: Quản lý & Xem tài liệu — Admin xem/download/xóa. Employee xem/download cá nhân. Soft delete. Kiểm tra quyền (userRole-based).
 FR-32: HR Dashboard — tổng NV active, mới tháng, nghỉ việc tháng, biến động. Danh sách HĐ hết hạn. Đơn chờ duyệt.
 FR-33: Payroll Dashboard — tổng chi phí lương tháng, so sánh tháng trước (%). Phân bổ theo phòng ban.
 FR-34: Leave Dashboard — Admin: tổng nghỉ phép tháng, theo loại, phòng ban nghỉ nhiều nhất. Manager: phòng ban mình. Lịch nghỉ team.
@@ -98,9 +98,9 @@ NFR-20: Audit log immutable — không có API update/delete cho audit records.
 - ARCH-13: Hibernate ddl-auto=update (dev), validate (prod). Versioned SQL scripts in db/migration/. Seed data in data.sql.
 
 **Authentication & Security:**
-- ARCH-14: jjwt library — access token HMAC-SHA256, 30min. Payload: sub(userId), role, iat, exp.
+- ARCH-14: jjwt library — access token HMAC-SHA256, 30min. Payload: sub(userId), userRole, iat, exp.
 - ARCH-15: Refresh token: UUID in refresh_tokens table (token, user_id, expires_at, revoked). 7-day TTL. Rotation on refresh.
-- ARCH-16: JwtAuthenticationFilter (OncePerRequestFilter) → validates JWT → creates CustomUserDetails (userId, role, departmentId) → SecurityContextHolder.
+- ARCH-16: JwtAuthenticationFilter (OncePerRequestFilter) → validates JWT → creates CustomUserDetails (userId, userRole, departmentId) → SecurityContextHolder.
 - ARCH-18: @PreAuthorize("hasRole('ADMIN')") + custom annotations for department-scoped access.
 - ARCH-19: BCryptPasswordEncoder strength 12. Default password random, sent via email, force-change on first login.
 - ARCH-20: CORS: dev allow localhost:4200, prod allow configured domain(s). Methods: GET/POST/PUT/DELETE/PATCH.
@@ -117,7 +117,7 @@ NFR-20: Audit log immutable — không có API update/delete cho audit records.
 - ARCH-27: Feature module structure: features/{module}/components/ services/ models/ {module}.routes.ts. Standalone components (explicit `standalone: true`), lazy-loaded.
 - ARCH-28: AuthService (Angular Service + Signals) — stores user, tokens via signal(). Persisted localStorage.
 - ARCH-29: JwtInterceptor (HttpInterceptor) — attaches Bearer header. On 401 → refresh → if fail → redirect /login via Router.
-- ARCH-30: RoleGuard (CanActivate) checks role from AuthService. Unauthorized → redirect dashboard/403.
+- ARCH-30: RoleGuard (CanActivate) checks userRole from AuthService. Unauthorized → redirect dashboard/403.
 - ARCH-31: Angular HttpClient for all API calls. Services return Observable<ApiResponse<T>>. Components consume via async pipe or toSignal(). Manual cache invalidation via service refresh() methods.
 - ARCH-32: NG-ZORRO Form + Angular Reactive Forms exclusively for all forms. Reactive Forms provides validation, dynamic fields. NG-ZORRO provides Vietnamese locale and form layout.
 
@@ -138,7 +138,7 @@ NFR-20: Audit log immutable — không có API update/delete cho audit records.
 ### UX Design Requirements
 
 UX-DR1: NG-ZORRO Theme Override — implement custom theme via NG-ZORRO global config + SCSS variables overriding: colors (primary #1677FF, success #059669, warning #D97706, danger #DC2626), border-radius (card 20px, input 12px, tag 9999px), typography (Inter font family, weight 800 for headings/badges), spacing (sidebar 260px, content padding 28px 36px, card padding 22px), shadows (dual-layer card shadow).
-UX-DR2: Premium Sidebar Component — dark navy #0F172A background + radial gradient accent (rgba(22,119,255,0.20)). Width 260px. Brand mark gradient square + "People Operations" subtitle. Nav items: SVG icons 19x19 stroke-width 2, 42px height, 13px radius, hover translateX(2px) + color shift. Active: primary-soft bg + 3px left indicator #1677FF. Groups: uppercase 11px/700/0.12em. Bottom: avatar + name + role. Collapsible (icon-only ~72px).
+UX-DR2: Premium Sidebar Component — dark navy #0F172A background + radial gradient accent (rgba(22,119,255,0.20)). Width 260px. Brand mark gradient square + "People Operations" subtitle. Nav items: SVG icons 19x19 stroke-width 2, 42px height, 13px radius, hover translateX(2px) + color shift. Active: primary-soft bg + 3px left indicator #1677FF. Groups: uppercase 11px/700/0.12em. Bottom: avatar + name + userRole. Collapsible (icon-only ~72px).
 UX-DR3: Content Topbar (integrated, not sticky separate bar) — search pill (320px, 44px, 999px radius, icon inline, shadow subtle), notification bell (40px circle, Badge count), message icon, avatar. No border on icons — hover background + shadow only.
 UX-DR4: Page Header Pattern — every page: Breadcrumb (13px/600/faint) → Title (32px/800/-0.04em) → Subtitle (15px/400/muted). Utilities right-aligned same row as title. 28px spacing to content below.
 UX-DR5: Premium Card Component — background white, radius 20px, padding 22px, shadow dual-layer (0 18px 50px rgba(15,23,42,0.06), 0 3px 10px rgba(15,23,42,0.04)), NO border. Hover: translateY(-3px) + shadow-hover (0 24px 70px rgba(15,23,42,0.10), 0 8px 18px rgba(15,23,42,0.06)).
@@ -170,7 +170,7 @@ UX-DR30: State Patterns Implementation — Loading: NZ Skeleton rows (5) matchin
 UX-DR31: Interaction Primitives — mouse-first. Click row → navigate detail. Row hover → highlight + show action icons. Enter submit, Esc close modal/drawer, Tab navigate fields. No custom keyboard shortcuts V1. No drag-drop V1. Sidebar collapse toggle saves to localStorage.
 UX-DR32: Elevation System — 7 shadow levels: card default (18px+3px dual-layer), card hover (24px+8px), button primary (14px blue glow), brand mark (14px blue glow strong), search bar (10px subtle), dropdown/popover (4px+16px), modal/drawer (8px+30px).
 UX-DR33: Navigation Patterns — sidebar collapse toggle (localStorage). Breadcrumb click → navigate up. List → Detail: row click. Detail → Edit: button → Drawer. Detail → Sub-entity: tabs within detail page. Back: breadcrumb or browser back, no custom Back button.
-UX-DR34: Accessibility Floor — WCAG 2.1 AA baseline (NG-ZORRO handles). Tab order = reading order. Esc closes modal/drawer/popover. aria-required, aria-invalid on forms (NG-ZORRO default). role="table" on tables. Status tags: color + text label (never color alone). Decorative icons: aria-hidden="true". Avatar: alt = employee name. Notification badge: aria-live="polite".
+UX-DR34: Accessibility Floor — WCAG 2.1 AA baseline (NG-ZORRO handles). Tab order = reading order. Esc closes modal/drawer/popover. aria-required, aria-invalid on forms (NG-ZORRO default). userRole="table" on tables. Status tags: color + text label (never color alone). Decorative icons: aria-hidden="true". Avatar: alt = employee name. Notification badge: aria-live="polite".
 
 ### FR Coverage Map
 
@@ -365,7 +365,7 @@ So that I can securely access the system with automatic session refresh.
 **Given** a registered user with valid credentials
 **When** I POST `/api/v1/auth/login` with `{ username, password }`
 **Then** I receive `ApiResponse<LoginResponse>` with code 200 containing: accessToken (JWT HMAC-SHA256, 30min TTL), refreshToken (UUID, 7 days)
-**And** JWT payload contains: sub (userId), role, iat, exp
+**And** JWT payload contains: sub (userId), userRole, iat, exp
 **And** password is verified against bcrypt hash (cost factor 12)
 **And** response format is `{ "code": 200, "message": "Thành công", "data": { "accessToken": "...", "refreshToken": "..." } }`
 
@@ -395,16 +395,16 @@ So that I can securely access the system with automatic session refresh.
 ### Story 1.4: RBAC Authorization
 
 As an **Admin**,
-I want role-based access control with 3 roles,
+I want userRole-based access control with 3 roles,
 So that users only access data within their permission scope.
 
 **Acceptance Criteria:**
 
-**Given** a user with role EMPLOYEE
+**Given** a user with userRole EMPLOYEE
 **When** they access an ADMIN-only endpoint (e.g., PUT `/api/v1/employees/{id}`)
 **Then** they receive `{ "code": 403, "message": "Không có quyền truy cập" }`
 
-**Given** a user with role MANAGER in Department A
+**Given** a user with userRole MANAGER in Department A
 **When** they query employee list
 **Then** they only see employees in Department A in the system
 
@@ -414,7 +414,7 @@ So that users only access data within their permission scope.
 
 **Given** the Spring Security filter chain
 **When** endpoint authorization is configured
-**Then** `@PreAuthorize` annotations enforce role checks on controller methods
+**Then** `@PreAuthorize` annotations enforce userRole checks on controller methods
 **And** public endpoints are only: `/api/v1/auth/login`, `/api/v1/auth/refresh`
 
 ### Story 1.5: User Account Management
@@ -426,7 +426,7 @@ So that I can manage system access for employees in my company.
 **Acceptance Criteria:**
 
 **Given** an Admin
-**When** they create a new user account with email and role
+**When** they create a new user account with email and userRole
 **Then** the account is created with a random password
 **And** email is sent with login credentials
 **And** the user must change password on first login (force-change flag)
@@ -462,11 +462,11 @@ So that the application feels like a high-quality commercial SaaS product.
 **And** a content area with integrated topbar: search pill (320px, 44px, 999px radius), notification bell (40px, badge placeholder), avatar dropdown
 **And** page header pattern: breadcrumb (13px/600) → title (32px/800/-0.04em) → subtitle (15px/400)
 
-**Given** a user with role EMPLOYEE
+**Given** a user with userRole EMPLOYEE
 **When** the sidebar renders
 **Then** they see only: Dashboard, Chấm công, Nghỉ phép, Phiếu lương (items outside scope are hidden, not disabled)
 
-**Given** a user with role ADMIN
+**Given** a user with userRole ADMIN
 **When** the sidebar renders
 **Then** they see all items except "Hệ thống"
 
@@ -487,7 +487,7 @@ So that the application feels like a high-quality commercial SaaS product.
 ### Story 1.7: Frontend Auth Flow & Route Protection
 
 As a **User**,
-I want to log in, have my session managed automatically, and be redirected based on my role,
+I want to log in, have my session managed automatically, and be redirected based on my userRole,
 So that I have a seamless and secure authentication experience.
 
 **Acceptance Criteria:**
@@ -509,7 +509,7 @@ So that I have a seamless and secure authentication experience.
 **And** if refresh fails, user is redirected to `/login` with `NzMessageService.warning("Phiên đăng nhập hết hạn")`
 
 **Given** an authenticated user
-**When** they navigate to a route outside their role scope
+**When** they navigate to a route outside their userRole scope
 **Then** RoleGuard redirects to 403 page
 
 **Given** an authenticated user
@@ -520,7 +520,7 @@ So that I have a seamless and secure authentication experience.
 **Given** the route structure
 **When** configured
 **Then** routes match: `/login`, `/dashboard`, `/employees`, `/contracts`, `/attendance`, `/leave`, `/payroll`, `/approvals`, `/reports`, `/audit-log`, `/config/*`, `/system/*`, `/profile`
-**And** each route is protected with RoleGuard (CanActivate) checking role from AuthService
+**And** each route is protected with RoleGuard (CanActivate) checking userRole from AuthService
 
 ---
 
@@ -724,7 +724,7 @@ So that all personnel documents (CCCD, certificates, CV) are centralized.
 
 **Given** a user without permission
 **When** they try to download another employee's document
-**Then** access is denied (role-based check on download endpoint)
+**Then** access is denied (userRole-based check on download endpoint)
 
 ### Story 2.8: Employee Import from Excel
 
@@ -894,7 +894,7 @@ So that my company has customized approval chains that match our organizational 
 **Acceptance Criteria:**
 
 **Given** an Admin
-**When** they POST to create a workflow template with: name, module (e.g., "LEAVE"), list of steps (each with order, approver type, approver role/user)
+**When** they POST to create a workflow template with: name, module (e.g., "LEAVE"), list of steps (each with order, approver type, approver userRole/user)
 **Then** the template is saved per-module, per-module
 **And** each step has: stepOrder, approverType (DIRECT_MANAGER, DEPARTMENT_MANAGER, ROLE, SPECIFIC_USER), approverRole or approverUserId
 
@@ -1080,7 +1080,7 @@ So that I can process requests efficiently without delays.
 **Given** an approver only sees requests at their current step
 **When** they view "Chờ duyệt"
 **Then** only requests where THEY are the current step approver are shown
-**And** within their role/department scope
+**And** within their userRole/department scope
 
 **Given** bulk selection
 **When** Admin checks multiple requests
@@ -1178,7 +1178,7 @@ So that payroll calculations comply with current Vietnamese regulations.
 
 As an **HR Admin**,
 I want to create flexible allowance types and assign them to employees,
-So that compensation packages reflect each employee's role and benefits.
+So that compensation packages reflect each employee's userRole and benefits.
 
 **Acceptance Criteria:**
 

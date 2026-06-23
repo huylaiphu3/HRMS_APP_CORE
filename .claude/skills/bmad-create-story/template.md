@@ -6,7 +6,7 @@ Status: ready-for-dev
 
 ## Story
 
-As a {{role}},
+As a {{userRole}},
 I want {{action}},
 so that {{benefit}}.
 

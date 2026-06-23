@@ -17,13 +17,13 @@ public class EmployeeController {
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<EmployeeDTO>> save(@RequestBody EmployeeDTO employeeDTO){
         employeeService.save(employeeDTO);
-        return ResponseEntity.ok(ApiResponse.success(200,employeeDTO));
+        return ResponseEntity.ok(ApiResponse.success(employeeDTO));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<EmployeeDTO>> findById(@PathVariable int id){
         EmployeeDTO employeeDTO = employeeService.findById(id);
-        return ResponseEntity.ok(ApiResponse.success(200,employeeDTO));
+        return ResponseEntity.ok(ApiResponse.success(employeeDTO));
     }
 
     @PutMapping("/update")
@@ -35,13 +35,6 @@ public class EmployeeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable int id){
         employeeService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success(200,"Đã xóa employee với id = " + id));
+        return ResponseEntity.ok(ApiResponse.success("Đã xóa employee với id = " + id));
     }
-
-    @PostMapping("/hello")
-    private String hello(){
-        return "Hello";
-    }
-
-
 }

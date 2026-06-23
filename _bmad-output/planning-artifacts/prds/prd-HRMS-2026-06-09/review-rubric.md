@@ -9,12 +9,12 @@ This is a well-structured, substantive PRD that would genuinely guide a developm
 The PRD opens with a clear statement of what changed from the brief (Section 0: SaaS-ready multi-tenant, audit log, documents, dashboard added) and names the trade-off: "Brief ban dau scope self-hosted don tenant; PRD mo rong nen tang de khong phai retrofit sau." This is honest and useful. The Vision (Section 1) names concrete competitors and prices, which grounds the differentiation claim in reality rather than aspiration.
 
 However, several real tensions are buried as assumptions rather than surfaced as decisions requiring sign-off:
-- The single-role-per-user assumption (Section 4.1) is a genuine architectural constraint for Vietnamese SMEs where HR staff often double as admin and manager. It is stated as an `[ASSUMPTION]` but should be a called-out decision with the trade-off named.
+- The single-userRole-per-user assumption (Section 4.1) is a genuine architectural constraint for Vietnamese SMEs where HR staff often double as admin and manager. It is stated as an `[ASSUMPTION]` but should be a called-out decision with the trade-off named.
 - The "no carry-over of leave days" assumption (FR-15) is flagged as Open Question #1 but also asserted as an assumption in the same FR. This mixed signal means a builder will just pick one.
 - Escalation behavior when an approver is unavailable (FR-40) -- "escalate to Admin" -- is a significant workflow choice that could surprise users, presented as an assumption rather than a decision.
 
 ### Findings
-- **high** Single-role constraint needs decision status (Section 4.1) -- This is stated as `[ASSUMPTION]` but is a load-bearing architectural choice that affects RBAC design, JWT structure, and UX. Vietnamese SME staff frequently hold multiple roles. *Fix:* Promote to an explicit decision with trade-off noted (simplicity vs. flexibility), or add a `[NOTE FOR PM]` requesting validation.
+- **high** Single-userRole constraint needs decision status (Section 4.1) -- This is stated as `[ASSUMPTION]` but is a load-bearing architectural choice that affects RBAC design, JWT structure, and UX. Vietnamese SME staff frequently hold multiple roles. *Fix:* Promote to an explicit decision with trade-off noted (simplicity vs. flexibility), or add a `[NOTE FOR PM]` requesting validation.
 - **medium** Leave carry-over is both assumed and questioned (FR-15 + Open Question #1) -- The assumption says "Khong chuyen sang nam sau" but OQ-1 asks for confirmation. The builder cannot tell which to follow. *Fix:* Remove the assumption and keep only the Open Question, or resolve the question and remove it from OQ list.
 - **medium** Approver-unavailable escalation path (FR-40) -- Escalating to Admin when an approver is disabled is a workflow design decision, not an inference. Different tenants may want different behavior. *Fix:* Surface as a decision; consider whether this should be configurable per-tenant or fixed.
 
@@ -98,8 +98,8 @@ No findings needed.
 
 ## Mechanical notes
 
-- **Glossary drift:** Minor -- "Admin" is used in some FRs to mean "HR Admin" (tenant-level), while Section 2.1 defines the JTBD role as "HR Admin" and Section 4.1 defines the system role as "Admin (HR Admin per-tenant)." The Glossary does not have an entry for "Admin" -- only "System Admin (Super Admin)." This could cause confusion between System Admin and tenant Admin. *Fix:* Add "Admin (HR Admin)" to the Glossary, or use "HR Admin" consistently in FRs.
+- **Glossary drift:** Minor -- "Admin" is used in some FRs to mean "HR Admin" (tenant-level), while Section 2.1 defines the JTBD userRole as "HR Admin" and Section 4.1 defines the system userRole as "Admin (HR Admin per-tenant)." The Glossary does not have an entry for "Admin" -- only "System Admin (Super Admin)." This could cause confusion between System Admin and tenant Admin. *Fix:* Add "Admin (HR Admin)" to the Glossary, or use "HR Admin" consistently in FRs.
 - **ID continuity:** FR IDs have gaps in section order (see finding above). UJ IDs are contiguous (UJ-1 through UJ-8) but UJ-8 appears before UJ-4 in the document. SM IDs are contiguous and ordered (SM-1 through SM-7, SM-C1, SM-C2).
 - **Assumptions Index roundtrip:** 18 inline assumptions, 18 index entries. One section reference error (4.12 vs 4.13 for the reports assumption). Otherwise complete roundtrip.
-- **UJ protagonist naming:** All 8 UJs have named protagonists with role context. Lan appears in UJ-1, UJ-4, UJ-6, UJ-7, UJ-8 (HR Admin). Minh in UJ-2, UJ-5 (Employee). Hoa in UJ-3 (Employee). Supporting characters named: Tuan, Hung.
+- **UJ protagonist naming:** All 8 UJs have named protagonists with userRole context. Lan appears in UJ-1, UJ-4, UJ-6, UJ-7, UJ-8 (HR Admin). Minh in UJ-2, UJ-5 (Employee). Hoa in UJ-3 (Employee). Supporting characters named: Tuan, Hung.
 - **Required sections:** All expected sections present for internal-stakes B2B SaaS: Vision, Personas/JTBD, UJs, Glossary, Features with FRs, Non-Goals, MVP Scope, Success Metrics, NFRs, Constraints, Open Questions, Assumptions Index.
