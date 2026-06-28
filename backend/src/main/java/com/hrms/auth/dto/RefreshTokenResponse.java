@@ -1,15 +1,14 @@
-package com.hrms.auth.dto;
-
-import com.hrms.auth.entity.RefreshToken;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class RefreshTokenResponse {
-    private String newAccessToken;
-}
+//package com.hrms.auth.dto;
+//
+//import lombok.AllArgsConstructor;
+//import lombok.Builder;
+//import lombok.Data;
+//import lombok.NoArgsConstructor;
+//
+//@Data
+//@NoArgsConstructor
+//@AllArgsConstructor
+//@Builder
+//public class RefreshTokenResponse {
+//    private String newAccessToken;
+//}

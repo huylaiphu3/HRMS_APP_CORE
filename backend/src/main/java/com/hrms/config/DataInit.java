@@ -26,14 +26,14 @@ public class DataInit implements CommandLineRunner {
 
     private void createAdminIfNotExists() {
 
-        boolean exists = userRepository.findByUsername("admin").isPresent();
+        boolean exists = userRepository.findByUsername("admin@gmail.com").isPresent();
 
         if (exists) {
             return;
         }
 
         User admin = new User();
-        admin.setUsername("admin");
+        admin.setUsername("admin@gmail.com");
         admin.setPassword(passwordEncoder.encode("Admin@123"));
         admin.setFullName("Full Name");
 
